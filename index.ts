@@ -1,14 +1,11 @@
 import * as core from '@actions/core';
-import { sendMessage } from './utils/slack';
-import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
+import { getReviewers, isReadyCodeReview } from './utils/github';
 
 async function main() {
   try {
-    console.log('hi');
-    sendMessage({
-      channel: TARGET_SLACK_CHANNEL_ID,
-      text: '테스트',
-    });
+    if (isReadyCodeReview()) {
+      console.log(getReviewers());
+    }
   } catch (e) {
     core.setFailed(e.message);
   }
