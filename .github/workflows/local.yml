@@ -8,6 +8,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+      - name: Cache node_modules
+        uses: actions/cache@v2
+        env:
+          cache-name: pr-reviewer-notify-cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-${{ env.cache-name }}-
+            ${{ runner.OS }}-
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.16.3
       - name: Install Packages
         run: yarn
       - name: run pr reviewer notify action
