@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
-import { TARGET_SLACK_CHANNEL_ID } from 'src/utils/input';
-import { sendMessage } from 'src/utils/slack';
-import { findSlackUserByGithubUser } from 'src/utils/user';
+import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
+import { sendMessage } from './utils/slack';
+import { findSlackUserByGithubUser } from './utils/user';
 import { getReviewers, isReadyCodeReview } from './utils/github';
 
 async function main() {

@@ -2,7 +2,7 @@
   "name": "lubycon-github-reviwer-slack-notify-action",
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts",
+  "main": "src/index.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lubycon/github-reviewer-slack-noti-action.git"
