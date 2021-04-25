@@ -8,15 +8,6 @@ export function sendMessage({ channel, text }: { channel: string; text: string }
   return slackClient.chat.postMessage({
     channel,
     text,
-    blocks: [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text,
-        },
-      },
-    ],
   });
 }
 
@@ -24,7 +15,7 @@ export function createSlackMention(developer: Pick<Developer, 'slackUserId'>) {
   return `<@${developer.slackUserId}>`;
 }
 
-export function createReviewRequestMessage(opener?: Developer, reviewers: Developer[]) {
+export function createReviewRequestMessage(reviewers: Developer[], opener?: Developer) {
   return `${reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
     .filter(v => v != null)
