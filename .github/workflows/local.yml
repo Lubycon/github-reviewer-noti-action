@@ -10,4 +10,4 @@ jobs:
         uses: actions/checkout@master
       - name: run pr reviewer notify action
         id: pr-reviewer-notify
-        run: ts-node index.js
+        run: npx ts-node index.js
