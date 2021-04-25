@@ -1,0 +1,13 @@
+name: Test Run
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: run pr reviewer notify action
+        id: pr-reviewer-notify
+        run: ts-node index.js
