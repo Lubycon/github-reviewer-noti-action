@@ -1,21 +1,15 @@
 {
   "compilerOptions": {
     "baseUrl": "./",
-    "outDir": "./dist",
-    "target": "es2016",
-    "module": "commonjs",
-    "lib": [
-      "dom",
-      "dom.iterable"
-    ],
+    "outDir": "./lib",
+    "target": "es2015",
     "moduleResolution": "node",
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
+    "module": "commonjs",
     "noImplicitReturns": true,
+    "noImplicitAny": true,
     "noUnusedParameters": true,
     "esModuleInterop": true,
     "strict": true,
-    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "importHelpers": true,
     "noFallthroughCasesInSwitch": true,

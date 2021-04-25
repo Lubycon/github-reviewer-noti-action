@@ -3,18 +3,23 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lubycon/github-reviewer-slack-noti-action.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node ./index.ts",
     "release": "semantic-release",
-    "build": "tsc"
+    "build": "ncc build --source-map --license licenses.txt"
   },
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "dependencies": {
     "@actions/core": "^1.2.7",
     "@actions/github": "^4.0.0",
     "@slack/web-api": "^6.1.0",
+    "@vercel/ncc": "^0.28.3",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
