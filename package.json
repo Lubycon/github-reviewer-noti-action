@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node ./index.ts",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
