@@ -27,3 +27,7 @@ jobs:
       - name: run pr reviewer notify action
         id: pr-reviewer-notify
         run: npx ts-node index.ts
+        with:
+          slack-channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}
+          base-branch: main
+          github-token: ${{ secrets.TEST_GITHUB_TOKEN }}
