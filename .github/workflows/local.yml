@@ -8,6 +8,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+      - name: Install Packages
+        run: yarn
       - name: run pr reviewer notify action
         id: pr-reviewer-notify
         run: npx ts-node index.js
