@@ -1,5 +1,6 @@
 import * as github from '@actions/github';
-import { GithubUser } from '../models/developer';
+import { Developer, GithubUser } from '../models/developer';
+import { findSlackUserByGithubUser } from './user';
 
 export function isReadyCodeReview() {
   const { eventName, payload } = github.context;
@@ -9,8 +10,15 @@ export function isReadyCodeReview() {
   return isPullReqeustEvent && isReadyForReview;
 }
 
-export function getReviewers(): string[] {
+export function getPullRequestReviewers() {
   const { pull_request } = github.context.payload;
   const reviewers: GithubUser[] = pull_request?.requested_reviewers;
-  return reviewers.map(user => user.login);
+  return reviewers
+    .map(user => findSlackUserByGithubUser(user.login))
+    .filter<Developer>((user): user is Developer => user != null);
+}
+
+export function getPullRequestOpener() {
+  const sender = github.context.payload.sender as GithubUser;
+  return findSlackUserByGithubUser(sender.login);
 }
