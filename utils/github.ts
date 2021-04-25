@@ -10,7 +10,7 @@ export function isReadyCodeReview() {
 
 export function getReviewers() {
   const { pull_request } = github.context.payload;
-  return pull_request?.requested_reviewers.map(user => {
+  return pull_request?.requested_reviewers.map((user: any) => {
     console.log(user);
     return user.login;
   });
