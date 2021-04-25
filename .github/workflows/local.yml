@@ -30,6 +30,6 @@ jobs:
         uses: ./
         id: pr-reviewer-notify
         with:
-          slack-channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}
+          channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}
           base-branch: main
           github-token: ${{ secrets.TEST_GITHUB_TOKEN }}
