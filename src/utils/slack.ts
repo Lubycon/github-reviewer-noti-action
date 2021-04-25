@@ -23,3 +23,10 @@ export function sendMessage({ channel, text }: { channel: string; text: string }
 export function createSlackMention(developer: Pick<Developer, 'slackUserId'>) {
   return `<@${developer.slackUserId}>`;
 }
+
+export function createReviewRequestMessage(opener?: Developer, reviewers: Developer[]) {
+  return `${reviewers
+    .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
+    .filter(v => v != null)
+    .join(',')} 리뷰 부탁드려요.\n\n${opener?.name}님이 리뷰를 요청했어요! 👀`;
+}
