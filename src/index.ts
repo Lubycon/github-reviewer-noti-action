@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
-import { sendMessage } from './utils/slack';
+import { sendMessage, createSlackMention } from './utils/slack';
 import { findSlackUserByGithubUser } from './utils/user';
 import { getReviewers, isReadyCodeReview } from './utils/github';
 
@@ -9,7 +9,7 @@ async function main() {
     if (isReadyCodeReview()) {
       const reviewers = getReviewers().map(findSlackUserByGithubUser);
       const message = `${reviewers
-        .map(reviewer => (reviewer ? `@${reviewer.name}` : null))
+        .map(reviewer => (reviewer ? createSlackMention(reviewer) : null))
         .filter(v => v != null)
         .join('님, ')} 리뷰 부탁드려요`;
 
