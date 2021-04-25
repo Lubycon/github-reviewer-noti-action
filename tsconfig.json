@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "outDir": "./dist",
     "target": "es2016",
     "module": "commonjs",
@@ -20,10 +20,6 @@
     "importHelpers": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
-    "resolveJsonModule": true,
-    "paths": {
-      "data/*": ["data/*"],
-      "utils/*": ["utils/*"],
-    }
+    "resolveJsonModule": true
   },
 }

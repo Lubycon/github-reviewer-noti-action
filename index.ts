@@ -1,6 +1,6 @@
 import core from '@actions/core';
-import { sendMessage } from 'utils/slack';
-import { TARGET_SLACK_CHANNEL_ID } from 'utils/input';
+import { sendMessage } from './utils/slack';
+import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
 
 async function main() {
   try {
