@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import { sendMessage } from './utils/slack';
 import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
 

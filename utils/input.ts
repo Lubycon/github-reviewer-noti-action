@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 
 export const BASE_BRANCH = core.getInput('base-branch');
 export const SLACK_BOT_TOKEN = core.getInput('slack-bot-token');
