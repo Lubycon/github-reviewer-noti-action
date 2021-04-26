@@ -1,5 +1,10 @@
 [
   {
+    "name": "Lubycon Admin",
+    "githubUserName": "lubycon-admin",
+    "slackUserId": "U01810LSJ0L"
+  },
+  {
     "name": "문동욱",
     "githubUserName": "evan-moon",
     "slackUserId": "U01810LSJ0L"
