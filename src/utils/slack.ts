@@ -30,7 +30,7 @@ export function createPullRequestReviewMessage({
     .join(',');
 
   return {
-    title: `${repository}에서 새로운 Pull Request가 오픈되었어요 :eyes:`,
+    title: `새로운 Pull Request가 오픈되었어요 :eyes:`,
     contents: `${createSlackMention(
       opener
     )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
