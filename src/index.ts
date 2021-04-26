@@ -7,6 +7,7 @@ import { isValidUser } from './utils/user';
 async function main() {
   if (!isValidUser(MY_SLACK_USER_ID)) {
     core.setFailed('루비콘 허브 슬랙 워크스페이스에 속한 유저 아이디가 아닙니다');
+    return;
   }
 
   if (!isReadyCodeReview()) {
