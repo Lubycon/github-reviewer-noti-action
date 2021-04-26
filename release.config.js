@@ -8,7 +8,7 @@ module.exports = {
         parserOpts: {
           noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES', 'BREAKING'],
         },
-        preset: 'conventionalcommits',
+        preset: 'angular',
         releaseRules: [
           {
             release: 'minor',
@@ -53,75 +53,7 @@ module.exports = {
         ],
       },
     ],
-    [
-      '@semantic-release/release-notes-generator',
-      {
-        parserOpts: {
-          noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES', 'BREAKING'],
-        },
-        preset: 'conventionalcommits',
-        presetConfig: {
-          types: [
-            {
-              section: 'Features',
-              type: 'feat',
-            },
-            {
-              section: 'Bug Fixes',
-              type: 'fix',
-            },
-            {
-              section: 'Documentation',
-              type: 'docs',
-            },
-            {
-              section: 'Styling',
-              type: 'style',
-            },
-            {
-              section: 'Refactors',
-              type: 'refactor',
-            },
-            {
-              section: 'Performance',
-              type: 'perf',
-            },
-            {
-              section: 'Tests',
-              type: 'test',
-            },
-            {
-              section: 'Build System',
-              type: 'build',
-            },
-            {
-              section: 'CI',
-              type: 'ci',
-            },
-            {
-              section: 'Reverts',
-              type: 'revert',
-            },
-          ],
-        },
-        writerOpts: {
-          commitGroupsSort: 'title',
-          commitsSort: ['subject', 'scope'],
-        },
-      },
-    ],
-    [
-      '@semantic-release/changelog',
-      {
-        changelogFile: 'CHANGELOG.md',
-      },
-    ],
-    [
-      '@semantic-release/npm',
-      {
-        npmPublish: false,
-      },
-    ],
+    '@semantic-release/release-notes-generator',
     [
       '@semantic-release/git',
       {
