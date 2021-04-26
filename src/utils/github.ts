@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { GithubPullRequest } from 'models/github';
+import { GithubPullRequest } from '../models/github';
 import { Developer, GithubUser } from '../models/developer';
 import { findSlackUserByGithubUser } from './user';
 
