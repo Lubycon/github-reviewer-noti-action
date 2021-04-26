@@ -34,3 +34,4 @@ jobs:
           channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}
           base-branch: main
           github-token: ${{ secrets.TEST_GITHUB_TOKEN }}
+          my-slack-id: U1111
