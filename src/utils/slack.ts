@@ -13,7 +13,7 @@ interface ReviewRequestMessageArguments {
 
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 
-export function createSlackMention(developer: Pick<Developer, 'slackUserId'>) {
+export function createSlackMention(developer: Developer) {
   return `<@${developer.slackUserId}>`;
 }
 
