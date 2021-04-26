@@ -1,23 +1,102 @@
-import { WebClient } from '@slack/web-api';
-import { SLACK_BOT_TOKEN } from './input';
+import { ChatPostMessageArguments, WebClient } from '@slack/web-api';
+import { SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
 import { Developer } from '../models/developer';
+import { GithubPullRequest } from '../models/github';
+
+interface ReviewRequestMessageArguments {
+  title: string;
+  contents: string;
+  pullRequestTitle: string;
+  pullRequestBody: string;
+  pullRequestLink: string;
+}
 
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
-
-export function sendMessage({ channel, text }: { channel: string; text: string }) {
-  return slackClient.chat.postMessage({
-    channel,
-    text,
-  });
-}
 
 export function createSlackMention(developer: Pick<Developer, 'slackUserId'>) {
   return `<@${developer.slackUserId}>`;
 }
 
-export function createReviewRequestMessage(reviewers: Developer[], opener?: Developer) {
-  return `${reviewers
+export function createPullRequestReviewMessage({
+  reviewers,
+  repository,
+  opener,
+  link,
+  title,
+  body,
+}: GithubPullRequest): ReviewRequestMessageArguments {
+  const reviewerNames = reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
     .filter(v => v != null)
-    .join(',')} 리뷰 부탁드려요.\n\n${opener?.name}님이 리뷰를 요청했어요! 👀`;
+    .join(',');
+
+  return {
+    title: `${repository}에서 새로운 Pull Request가 오픈되었어요 :eyes:`,
+    contents: `${createSlackMention(
+      opener
+    )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
+    pullRequestTitle: title,
+    pullRequestBody: body,
+    pullRequestLink: link,
+  };
+}
+
+export function sendMessage(args: ChatPostMessageArguments) {
+  return slackClient.chat.postMessage(args);
+}
+
+export function sendMessagePullRequestReviewMessage({
+  title,
+  contents,
+  pullRequestTitle,
+  pullRequestBody,
+  pullRequestLink,
+}: ReviewRequestMessageArguments) {
+  const blocks = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: title,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `>*${pullRequestTitle}*\n>${pullRequestBody}`,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: contents,
+      },
+    },
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: '지금 리뷰하기 :fire:',
+            emoji: true,
+          },
+          style: 'primary',
+          url: pullRequestLink,
+        },
+      ],
+    },
+  ];
+
+  sendMessage({
+    channel: TARGET_SLACK_CHANNEL_ID,
+    text: '',
+    blocks,
+  });
 }

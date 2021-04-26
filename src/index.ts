@@ -1,7 +1,6 @@
 import * as core from '@actions/core';
-import { TARGET_SLACK_CHANNEL_ID } from './utils/input';
-import { sendMessage, createReviewRequestMessage } from './utils/slack';
-import { getPullRequestOpener, getPullRequestReviewers, isReadyCodeReview } from './utils/github';
+import { createPullRequestReviewMessage, sendMessagePullRequestReviewMessage } from './utils/slack';
+import { getPullRequest, isReadyCodeReview } from './utils/github';
 
 async function main() {
   if (!isReadyCodeReview()) {
@@ -9,11 +8,9 @@ async function main() {
   }
 
   try {
-    const reviewers = getPullRequestReviewers();
-    const opener = getPullRequestOpener();
-    const message = createReviewRequestMessage(reviewers, opener);
-
-    sendMessage({ channel: TARGET_SLACK_CHANNEL_ID, text: message });
+    const pullRequest = getPullRequest();
+    const message = createPullRequestReviewMessage(pullRequest);
+    sendMessagePullRequestReviewMessage(message);
   } catch (e) {
     core.setFailed(e.message);
   }
