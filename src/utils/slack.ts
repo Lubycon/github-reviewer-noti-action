@@ -6,8 +6,8 @@ import { GithubPullRequest } from '../models/github';
 interface ReviewRequestMessageArguments {
   title: string;
   contents: string;
+  repositoryName: string;
   pullRequestTitle: string;
-  pullRequestBody: string;
   pullRequestLink: string;
 }
 
@@ -23,7 +23,6 @@ export function createPullRequestReviewMessage({
   opener,
   link,
   title,
-  body,
 }: GithubPullRequest): ReviewRequestMessageArguments {
   const reviewerNames = reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
@@ -35,8 +34,8 @@ export function createPullRequestReviewMessage({
     contents: `${createSlackMention(
       opener
     )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
+    repositoryName: repository,
     pullRequestTitle: title,
-    pullRequestBody: body,
     pullRequestLink: link,
   };
 }
@@ -48,8 +47,8 @@ export function sendMessage(args: ChatPostMessageArguments) {
 export function sendMessagePullRequestReviewMessage({
   title,
   contents,
+  repositoryName,
   pullRequestTitle,
-  pullRequestBody,
   pullRequestLink,
 }: ReviewRequestMessageArguments) {
   const blocks = [
@@ -64,7 +63,7 @@ export function sendMessagePullRequestReviewMessage({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `>*${pullRequestTitle}*\n>${pullRequestBody}`,
+        text: `*${repositoryName}* < <${pullRequestLink}|${pullRequestTitle}>`,
       },
     },
     {
