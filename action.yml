@@ -13,8 +13,6 @@ inputs:
   github-token:
     description: 'Personal access token with repository rights.'
     required: true
-  my-slack-user-id:
-    description: 'Your slack user id in Lubycon Hub workspace.'
 runs:
   using: 'node12'
   main: 'dist/index.js'
