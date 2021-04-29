@@ -32,6 +32,5 @@ jobs:
         with:
           slack-bot-token: ${{ secrets.LUBYCON_SLACK_BOT_TOKEN }}
           channel-id: C01UXTP3P4P
-          base-branch: main
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
           my-slack-user-id: U01810LSJ0L
