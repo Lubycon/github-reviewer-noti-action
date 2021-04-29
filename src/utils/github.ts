@@ -15,8 +15,8 @@ export function isReadyCodeReview() {
   return isPullReqeustEvent && isReadyForReview;
 }
 
-async function getCodeOwners() {
-  const filePath = path.join(process.env.GITHUB_WORKSPACE || './', CODEOWNERS_PATH);
+export async function getCodeOwners() {
+  const filePath = path.join(process.env.GITHUB_WORKSPACE ?? './', CODEOWNERS_PATH);
   try {
     const contents = await readFile(filePath);
     return contents
@@ -36,7 +36,8 @@ async function getPullRequestReviewers() {
 
   const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
 
-  core.info(`PR 리뷰어는 깃허브 아이디 ${reviewers.join(',')} 입니다`);
+  core.info(`코드오너는 ${codeOwners.join(',')}입니다`);
+  core.info(`최종 PR 리뷰어는 깃허브 아이디 ${reviewers.join(',')} 입니다`);
 
   return reviewers
     .map(user => findSlackUserByGithubUser(developers, user))

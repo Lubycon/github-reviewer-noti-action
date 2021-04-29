@@ -1,1 +1,1 @@
-export const CODEOWNERS_PATH = './CODEOWNERS';
+export const CODEOWNERS_PATH = './.github/CODEOWNERS';
