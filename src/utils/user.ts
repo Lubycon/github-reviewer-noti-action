@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { Developer } from '../models/developer';
 
 export async function fetchDevelopers(): Promise<Developer[]> {
