@@ -1,8 +1,11 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import path from 'path';
 import { GithubPullRequest } from '../models/github';
 import { Developer, GithubUser } from '../models/developer';
 import { fetchDevelopers, findSlackUserByGithubUser } from './user';
+import { readFile } from './file';
+import { CODEOWNERS_PATH } from '../constants/github';
 
 export function isReadyCodeReview() {
   const { eventName, payload } = github.context;
@@ -12,19 +15,35 @@ export function isReadyCodeReview() {
   return isPullReqeustEvent && isReadyForReview;
 }
 
-export async function getPullRequestReviewers() {
+async function getCodeOwners() {
+  const filePath = path.join(process.env.GITHUB_WORKSPACE || './', CODEOWNERS_PATH);
+  try {
+    const contents = await readFile(filePath);
+    return contents
+      .replace(/\*\s/, '')
+      .split(/\s/)
+      .map(member => member.replace('@', ''));
+  } catch {
+    return [];
+  }
+}
+
+async function getPullRequestReviewers() {
   const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
-  const reviewers: GithubUser[] = pull_request?.requested_reviewers;
+  const codeOwners = await getCodeOwners();
+  const prReviewers: GithubUser[] = pull_request?.requested_reviewers;
 
-  core.info(`PR 리뷰어는 깃허브 아이디 ${reviewers.map(reviewer => reviewer.login).join(',')} 입니다`);
+  const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
+
+  core.info(`PR 리뷰어는 깃허브 아이디 ${reviewers.join(',')} 입니다`);
 
   return reviewers
-    .map(user => findSlackUserByGithubUser(developers, user.login))
+    .map(user => findSlackUserByGithubUser(developers, user))
     .filter<Developer>((user): user is Developer => user != null);
 }
 
-export async function getPullRequestOpener() {
+async function getPullRequestOpener() {
   const developers = await fetchDevelopers();
   const sender = github.context.payload.sender as GithubUser;
   return (
@@ -36,7 +55,7 @@ export async function getPullRequestOpener() {
   );
 }
 
-export function getRepositoryName() {
+function getRepositoryName() {
   const { repository } = github.context.payload;
   return repository?.name;
 }
