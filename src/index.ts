@@ -8,7 +8,7 @@ async function main() {
   }
 
   try {
-    const pullRequest = getPullRequest();
+    const pullRequest = await getPullRequest();
     const message = createPullRequestReviewMessage(pullRequest);
     sendMessagePullRequestReviewMessage(message);
   } catch (e) {

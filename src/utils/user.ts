@@ -1,7 +1,10 @@
-import developers from '../data/developers.json';
 import { Developer } from '../models/developer';
 
-export function findSlackUserByGithubUser(githubUserName: string) {
-  const targets = developers as Developer[];
-  return targets.find(user => user.githubUserName === githubUserName);
+export async function fetchDevelopers(): Promise<Developer[]> {
+  const response = await fetch('https://assets.lubycon.io/data/developers.json');
+  return response.json();
+}
+
+export function findSlackUserByGithubUser(developers: Developer[], githubUserName: string) {
+  return developers.find(user => user.githubUserName === githubUserName);
 }
