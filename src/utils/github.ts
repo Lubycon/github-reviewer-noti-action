@@ -1,7 +1,7 @@
 import * as github from '@actions/github';
 import { GithubPullRequest } from '../models/github';
 import { Developer, GithubUser } from '../models/developer';
-import { findSlackUserByGithubUser } from './user';
+import { fetchDevelopers, findSlackUserByGithubUser } from './user';
 
 export function isReadyCodeReview() {
   const { eventName, payload } = github.context;
@@ -11,18 +11,20 @@ export function isReadyCodeReview() {
   return isPullReqeustEvent && isReadyForReview;
 }
 
-export function getPullRequestReviewers() {
+export async function getPullRequestReviewers() {
+  const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
   const reviewers: GithubUser[] = pull_request?.requested_reviewers;
   return reviewers
-    .map(user => findSlackUserByGithubUser(user.login))
+    .map(user => findSlackUserByGithubUser(developers, user.login))
     .filter<Developer>((user): user is Developer => user != null);
 }
 
-export function getPullRequestOpener() {
+export async function getPullRequestOpener() {
+  const developers = await fetchDevelopers();
   const sender = github.context.payload.sender as GithubUser;
   return (
-    findSlackUserByGithubUser(sender.login) ?? {
+    findSlackUserByGithubUser(developers, sender.login) ?? {
       name: sender.login,
       slackUserId: '',
       githubUserName: sender.login,
@@ -35,10 +37,10 @@ export function getRepositoryName() {
   return repository?.name;
 }
 
-export function getPullRequest(): GithubPullRequest {
+export async function getPullRequest(): Promise<GithubPullRequest> {
   const { pull_request } = github.context.payload;
-  const reviewers = getPullRequestReviewers();
-  const opener = getPullRequestOpener();
+  const reviewers = await getPullRequestReviewers();
+  const opener = await getPullRequestOpener();
   const repository = getRepositoryName() ?? '';
 
   return {
