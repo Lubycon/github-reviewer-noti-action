@@ -1,3 +1,4 @@
+import core from '@actions/core';
 import * as github from '@actions/github';
 import { GithubPullRequest } from '../models/github';
 import { Developer, GithubUser } from '../models/developer';
@@ -15,8 +16,15 @@ export async function getPullRequestReviewers() {
   const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
   const reviewers: GithubUser[] = pull_request?.requested_reviewers;
+
+  core.info(`PR 리뷰어 ${reviewers.map(reviewer => reviewer.login).join(',')}님을 찾았습니다.`);
+
   return reviewers
-    .map(user => findSlackUserByGithubUser(developers, user.login))
+    .map(user => {
+      const foundUser = findSlackUserByGithubUser(developers, user.login);
+      core.info(`${user.login}과 매칭되는 루비콘 멤버 ${foundUser?.name ?? 'Unknown'}님을 찾았습니다.`);
+      return foundUser;
+    })
     .filter<Developer>((user): user is Developer => user != null);
 }
 
