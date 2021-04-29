@@ -17377,207 +17377,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 2187:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
-var tslib = __nccwpck_require__(4351);
-;// CONCATENATED MODULE: ./node_modules/tslib/modules/index.js
-
-const {
-    __extends,
-    __assign,
-    __rest,
-    __decorate,
-    __param,
-    __metadata,
-    __awaiter,
-    __generator,
-    __exportStar,
-    __createBinding,
-    __values,
-    __read,
-    __spread,
-    __spreadArrays,
-    __await,
-    __asyncGenerator,
-    __asyncDelegator,
-    __asyncValues,
-    __makeTemplateObject,
-    __importStar,
-    __importDefault,
-    __classPrivateFieldGet,
-    __classPrivateFieldSet,
-} = tslib;
-
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/@slack/web-api/dist/index.js
-var dist = __nccwpck_require__(431);
-;// CONCATENATED MODULE: ./src/utils/input.ts
-
-const SLACK_BOT_TOKEN = core.getInput('slack-bot-token');
-const TARGET_SLACK_CHANNEL_ID = core.getInput('channel-id');
-const GITHUB_TOKEN = core.getInput('github-token');
-
-;// CONCATENATED MODULE: ./src/utils/slack.ts
-
-
-const slackClient = new dist.WebClient(SLACK_BOT_TOKEN);
-function createSlackMention(developer) {
-    return `<@${developer.slackUserId}>`;
-}
-function createPullRequestReviewMessage({ reviewers, repository, opener, link, title, }) {
-    const reviewerNames = reviewers
-        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
-        .filter(v => v != null)
-        .join(',');
-    return {
-        title: `새로운 Pull Request가 오픈되었어요 :eyes:`,
-        contents: `${createSlackMention(opener)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
-        repositoryName: repository,
-        pullRequestTitle: title,
-        pullRequestLink: link,
-    };
-}
-function sendMessage(args) {
-    return slackClient.chat.postMessage(args);
-}
-function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, pullRequestTitle, pullRequestLink, }) {
-    const blocks = [
-        {
-            type: 'header',
-            text: {
-                type: 'plain_text',
-                text: title,
-            },
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `*${repositoryName}* < <${pullRequestLink}|${pullRequestTitle}>`,
-            },
-        },
-        {
-            type: 'divider',
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: contents,
-            },
-        },
-        {
-            type: 'actions',
-            elements: [
-                {
-                    type: 'button',
-                    text: {
-                        type: 'plain_text',
-                        text: '지금 리뷰하기 :fire:',
-                        emoji: true,
-                    },
-                    style: 'primary',
-                    url: pullRequestLink,
-                },
-            ],
-        },
-    ];
-    sendMessage({
-        channel: TARGET_SLACK_CHANNEL_ID,
-        text: '',
-        blocks,
-    });
-}
-
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
-;// CONCATENATED MODULE: ./src/data/developers.json
-const developers_namespaceObject = JSON.parse('[{"name":"Lubycon Admin","githubUserName":"lubycon-admin","slackUserId":"U01810LSJ0L"},{"name":"문동욱","githubUserName":"evan-moon","slackUserId":"U01810LSJ0L"},{"name":"송민석","githubUserName":"s-ong-c","slackUserId":"U01SJGXQ8N9"},{"name":"이정연","githubUserName":"pa-rang","slackUserId":"U01SMT5QG5R"},{"name":"이지형","githubUserName":"MiaJLee","slackUserId":"U01TBAQ9Y64"},{"name":"진유림","githubUserName":"milooy","slackUserId":"U01JUKELXK9"},{"name":"주혜인","githubUserName":"theJunimo","slackUserId":"U01STQJLFS8"}]');
-;// CONCATENATED MODULE: ./src/utils/user.ts
-
-function findSlackUserByGithubUser(githubUserName) {
-    const targets = developers_namespaceObject;
-    return targets.find(user => user.githubUserName === githubUserName);
-}
-
-;// CONCATENATED MODULE: ./src/utils/github.ts
-
-
-function isReadyCodeReview() {
-    const { eventName, payload } = github.context;
-    const isPullReqeustEvent = eventName === 'pull_request';
-    const isReadyForReview = payload.action === 'opened' || payload.action === 'ready_for_review';
-    return isPullReqeustEvent && isReadyForReview;
-}
-function getPullRequestReviewers() {
-    const { pull_request } = github.context.payload;
-    const reviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
-    return reviewers
-        .map(user => findSlackUserByGithubUser(user.login))
-        .filter((user) => user != null);
-}
-function getPullRequestOpener() {
-    var _a;
-    const sender = github.context.payload.sender;
-    return ((_a = findSlackUserByGithubUser(sender.login)) !== null && _a !== void 0 ? _a : {
-        name: sender.login,
-        slackUserId: '',
-        githubUserName: sender.login,
-    });
-}
-function getRepositoryName() {
-    const { repository } = github.context.payload;
-    return repository === null || repository === void 0 ? void 0 : repository.name;
-}
-function getPullRequest() {
-    var _a, _b, _c, _d;
-    const { pull_request } = github.context.payload;
-    const reviewers = getPullRequestReviewers();
-    const opener = getPullRequestOpener();
-    const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
-    return {
-        title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
-        body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
-        link: ((_d = pull_request === null || pull_request === void 0 ? void 0 : pull_request._links.html.href) !== null && _d !== void 0 ? _d : ''),
-        reviewers,
-        opener,
-        repository,
-    };
-}
-
-;// CONCATENATED MODULE: ./src/index.ts
-
-
-
-
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!isReadyCodeReview()) {
-            return;
-        }
-        try {
-            const pullRequest = getPullRequest();
-            const message = createPullRequestReviewMessage(pullRequest);
-            sendMessagePullRequestReviewMessage(message);
-        }
-        catch (e) {
-            core.setFailed(e.message);
-        }
-    });
-}
-main();
-
-
-/***/ }),
-
 /***/ 696:
 /***/ ((module) => {
 
@@ -17841,13 +17640,219 @@ module.exports = require("zlib");;
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module doesn't tell about it's top-level declarations so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(2187);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
+var tslib = __nccwpck_require__(4351);
+;// CONCATENATED MODULE: ./node_modules/tslib/modules/index.js
+
+const {
+    __extends,
+    __assign,
+    __rest,
+    __decorate,
+    __param,
+    __metadata,
+    __awaiter,
+    __generator,
+    __exportStar,
+    __createBinding,
+    __values,
+    __read,
+    __spread,
+    __spreadArrays,
+    __await,
+    __asyncGenerator,
+    __asyncDelegator,
+    __asyncValues,
+    __makeTemplateObject,
+    __importStar,
+    __importDefault,
+    __classPrivateFieldGet,
+    __classPrivateFieldSet,
+} = tslib;
+
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/@slack/web-api/dist/index.js
+var dist = __nccwpck_require__(431);
+;// CONCATENATED MODULE: ./src/utils/input.ts
+
+const SLACK_BOT_TOKEN = core.getInput('slack-bot-token');
+const TARGET_SLACK_CHANNEL_ID = core.getInput('channel-id');
+const GITHUB_TOKEN = core.getInput('github-token');
+
+;// CONCATENATED MODULE: ./src/utils/slack.ts
+
+
+const slackClient = new dist.WebClient(SLACK_BOT_TOKEN);
+function createSlackMention(developer) {
+    return `<@${developer.slackUserId}>`;
+}
+function createPullRequestReviewMessage({ reviewers, repository, opener, link, title, }) {
+    const reviewerNames = reviewers
+        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
+        .filter(v => v != null)
+        .join(',');
+    return {
+        title: `새로운 Pull Request가 오픈되었어요 :eyes:`,
+        contents: `${createSlackMention(opener)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
+        repositoryName: repository,
+        pullRequestTitle: title,
+        pullRequestLink: link,
+    };
+}
+function sendMessage(args) {
+    return slackClient.chat.postMessage(args);
+}
+function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, pullRequestTitle, pullRequestLink, }) {
+    const blocks = [
+        {
+            type: 'header',
+            text: {
+                type: 'plain_text',
+                text: title,
+            },
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*${repositoryName}* < <${pullRequestLink}|${pullRequestTitle}>`,
+            },
+        },
+        {
+            type: 'divider',
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: contents,
+            },
+        },
+        {
+            type: 'actions',
+            elements: [
+                {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: '지금 리뷰하기 :fire:',
+                        emoji: true,
+                    },
+                    style: 'primary',
+                    url: pullRequestLink,
+                },
+            ],
+        },
+    ];
+    sendMessage({
+        channel: TARGET_SLACK_CHANNEL_ID,
+        text: '',
+        blocks,
+    });
+}
+
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
+;// CONCATENATED MODULE: ./src/utils/user.ts
+
+function fetchDevelopers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch('https://assets.lubycon.io/data/developers.json');
+        return response.json();
+    });
+}
+function findSlackUserByGithubUser(developers, githubUserName) {
+    return developers.find(user => user.githubUserName === githubUserName);
+}
+
+;// CONCATENATED MODULE: ./src/utils/github.ts
+
+
+
+function isReadyCodeReview() {
+    const { eventName, payload } = github.context;
+    const isPullReqeustEvent = eventName === 'pull_request';
+    const isReadyForReview = payload.action === 'opened' || payload.action === 'ready_for_review';
+    return isPullReqeustEvent && isReadyForReview;
+}
+function getPullRequestReviewers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const developers = yield fetchDevelopers();
+        const { pull_request } = github.context.payload;
+        const reviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
+        return reviewers
+            .map(user => findSlackUserByGithubUser(developers, user.login))
+            .filter((user) => user != null);
+    });
+}
+function getPullRequestOpener() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const developers = yield fetchDevelopers();
+        const sender = github.context.payload.sender;
+        return ((_a = findSlackUserByGithubUser(developers, sender.login)) !== null && _a !== void 0 ? _a : {
+            name: sender.login,
+            slackUserId: '',
+            githubUserName: sender.login,
+        });
+    });
+}
+function getRepositoryName() {
+    const { repository } = github.context.payload;
+    return repository === null || repository === void 0 ? void 0 : repository.name;
+}
+function getPullRequest() {
+    var _a, _b, _c, _d;
+    return __awaiter(this, void 0, void 0, function* () {
+        const { pull_request } = github.context.payload;
+        const reviewers = yield getPullRequestReviewers();
+        const opener = yield getPullRequestOpener();
+        const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
+        return {
+            title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
+            body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
+            link: ((_d = pull_request === null || pull_request === void 0 ? void 0 : pull_request._links.html.href) !== null && _d !== void 0 ? _d : ''),
+            reviewers,
+            opener,
+            repository,
+        };
+    });
+}
+
+;// CONCATENATED MODULE: ./src/index.ts
+
+
+
+
+function main() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!isReadyCodeReview()) {
+            return;
+        }
+        try {
+            const pullRequest = yield getPullRequest();
+            const message = createPullRequestReviewMessage(pullRequest);
+            sendMessagePullRequestReviewMessage(message);
+        }
+        catch (e) {
+            core.setFailed(e.message);
+        }
+    });
+}
+main();
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
