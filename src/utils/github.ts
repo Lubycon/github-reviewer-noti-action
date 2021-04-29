@@ -1,3 +1,4 @@
+import core from '@actions/core';
 import * as github from '@actions/github';
 import { GithubPullRequest } from '../models/github';
 import { Developer, GithubUser } from '../models/developer';
@@ -15,6 +16,9 @@ export async function getPullRequestReviewers() {
   const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
   const reviewers: GithubUser[] = pull_request?.requested_reviewers;
+
+  core.info(`PR 리뷰어는 깃허브 아이디 ${reviewers.map(reviewer => reviewer.login).join(',')} 입니다`);
+
   return reviewers
     .map(user => findSlackUserByGithubUser(developers, user.login))
     .filter<Developer>((user): user is Developer => user != null);
@@ -42,6 +46,9 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
   const reviewers = await getPullRequestReviewers();
   const opener = await getPullRequestOpener();
   const repository = getRepositoryName() ?? '';
+
+  core.info(`PR 생성자: ${opener.name}`);
+  core.info(`PR 리뷰어: ${reviewers.map(reviewer => reviewer.name).join(',')}`);
 
   return {
     title: (pull_request?.title ?? '') as string,
