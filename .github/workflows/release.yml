@@ -10,13 +10,13 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     env:
-      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0 # gives semantic-release access to all previous commits
-          token: ${{ secrets.GH_TOKEN }} # admin token
+          token: ${{ secrets.GITHUB_TOKEN }} # admin token
       - name: Cache node_modules
         uses: actions/cache@v2
         env:
