@@ -9,6 +9,7 @@ async function main() {
 
   try {
     const pullRequest = await getPullRequest();
+    core.info(JSON.stringify(pullRequest));
     const message = createPullRequestReviewMessage(pullRequest);
     sendMessagePullRequestReviewMessage(message);
   } catch (e) {
