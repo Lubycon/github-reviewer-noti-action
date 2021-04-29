@@ -17,14 +17,10 @@ export async function getPullRequestReviewers() {
   const { pull_request } = github.context.payload;
   const reviewers: GithubUser[] = pull_request?.requested_reviewers;
 
-  core.info(`PR 리뷰어 ${reviewers.map(reviewer => reviewer.login).join(',')}님을 찾았습니다.`);
+  core.info(`PR 리뷰어는 깃허브 아이디 ${reviewers.map(reviewer => reviewer.login).join(',')} 입니다`);
 
   return reviewers
-    .map(user => {
-      const foundUser = findSlackUserByGithubUser(developers, user.login);
-      core.info(`${user.login}과 매칭되는 루비콘 멤버 ${foundUser?.name ?? 'Unknown'}님을 찾았습니다.`);
-      return foundUser;
-    })
+    .map(user => findSlackUserByGithubUser(developers, user.login))
     .filter<Developer>((user): user is Developer => user != null);
 }
 
@@ -50,6 +46,9 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
   const reviewers = await getPullRequestReviewers();
   const opener = await getPullRequestOpener();
   const repository = getRepositoryName() ?? '';
+
+  core.info(`PR 생성자: ${opener.name}`);
+  core.info(`PR 리뷰어: ${reviewers.map(reviewer => reviewer.name).join(',')}`);
 
   return {
     title: (pull_request?.title ?? '') as string,
