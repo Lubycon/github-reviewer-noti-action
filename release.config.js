@@ -20,6 +20,10 @@ module.exports = {
           },
           {
             release: 'patch',
+            type: 'chore',
+          },
+          {
+            release: 'patch',
             type: 'docs',
           },
           {
