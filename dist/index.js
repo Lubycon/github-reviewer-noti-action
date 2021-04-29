@@ -17791,6 +17791,9 @@ function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, 
 
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(5622);
+var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
 // EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
 var lib = __nccwpck_require__(467);
 var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
@@ -17807,7 +17810,32 @@ function findSlackUserByGithubUser(developers, githubUserName) {
     return developers.find(user => user.githubUserName === githubUserName);
 }
 
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(5747);
+var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
+;// CONCATENATED MODULE: ./src/utils/file.ts
+
+
+function readFile(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            external_fs_default().readFile(file, { encoding: 'utf-8' }, (err, data) => {
+                if (err)
+                    reject(err);
+                resolve(data);
+            });
+        });
+    });
+}
+
+;// CONCATENATED MODULE: ./src/constants/github.ts
+const CODEOWNERS_PATH = './.github/CODEOWNERS';
+
 ;// CONCATENATED MODULE: ./src/utils/github.ts
+
+
+
+
 
 
 
@@ -17817,13 +17845,36 @@ function isReadyCodeReview() {
     const isReadyForReview = payload.action === 'opened' || payload.action === 'ready_for_review';
     return isPullReqeustEvent && isReadyForReview;
 }
+function getCodeOwners() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const filePath = external_path_default().join((_a = process.env.GITHUB_WORKSPACE) !== null && _a !== void 0 ? _a : './', CODEOWNERS_PATH);
+        const opener = yield getPullRequestOpener();
+        try {
+            const contents = yield readFile(filePath);
+            const owners = contents
+                .replace(/\*\s/, '')
+                .split(/\s/)
+                .map(member => member.replace('@', ''))
+                .filter(owner => owner !== opener.githubUserName);
+            return owners;
+        }
+        catch (_b) {
+            return [];
+        }
+    });
+}
 function getPullRequestReviewers() {
     return __awaiter(this, void 0, void 0, function* () {
         const developers = yield fetchDevelopers();
         const { pull_request } = github.context.payload;
-        const reviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
+        const codeOwners = yield getCodeOwners();
+        const prReviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
+        const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
+        core.info(`코드오너는 ${codeOwners.join(',')}입니다`);
+        core.info(`PR에 입력된 리뷰어는 ${prReviewers.join(',')} 입니다`);
         return reviewers
-            .map(user => findSlackUserByGithubUser(developers, user.login))
+            .map(user => findSlackUserByGithubUser(developers, user))
             .filter((user) => user != null);
     });
 }
@@ -17850,6 +17901,8 @@ function getPullRequest() {
         const reviewers = yield getPullRequestReviewers();
         const opener = yield getPullRequestOpener();
         const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
+        core.info(`PR 생성자는 ${opener.name} 입니다`);
+        core.info(`🔥 최종 PR 리뷰어는 ${reviewers.map(reviewer => reviewer.name).join(',')} 입니다.`);
         return {
             title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
             body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
@@ -17873,6 +17926,7 @@ function main() {
         }
         try {
             const pullRequest = yield getPullRequest();
+            core.info(JSON.stringify(pullRequest));
             const message = createPullRequestReviewMessage(pullRequest);
             sendMessagePullRequestReviewMessage(message);
         }
