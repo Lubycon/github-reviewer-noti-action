@@ -15,14 +15,17 @@ export function isReadyCodeReview() {
   return isPullReqeustEvent && isReadyForReview;
 }
 
-export async function getCodeOwners() {
+async function getCodeOwners() {
   const filePath = path.join(process.env.GITHUB_WORKSPACE ?? './', CODEOWNERS_PATH);
+  const opener = await getPullRequestOpener();
   try {
     const contents = await readFile(filePath);
-    return contents
+    const owners = contents
       .replace(/\*\s/, '')
       .split(/\s/)
-      .map(member => member.replace('@', ''));
+      .map(member => member.replace('@', ''))
+      .filter(owner => owner !== opener.githubUserName);
+    return owners;
   } catch {
     return [];
   }
@@ -37,7 +40,7 @@ async function getPullRequestReviewers() {
   const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
 
   core.info(`코드오너는 ${codeOwners.join(',')}입니다`);
-  core.info(`최종 PR 리뷰어는 깃허브 아이디 ${reviewers.join(',')} 입니다`);
+  core.info(`PR에 입력된 리뷰어는 ${prReviewers.join(',')} 입니다`);
 
   return reviewers
     .map(user => findSlackUserByGithubUser(developers, user))
@@ -67,8 +70,8 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
   const opener = await getPullRequestOpener();
   const repository = getRepositoryName() ?? '';
 
-  core.info(`PR 생성자: ${opener.name}`);
-  core.info(`PR 리뷰어: ${reviewers.map(reviewer => reviewer.name).join(',')}`);
+  core.info(`PR 생성자는 ${opener.name} 입니다`);
+  core.info(`🔥 최종 PR 리뷰어는 ${reviewers.map(reviewer => reviewer.name).join(',')} 입니다.`);
 
   return {
     title: (pull_request?.title ?? '') as string,
