@@ -6,6 +6,6 @@ export async function fetchDevelopers(): Promise<Developer[]> {
   return response.json();
 }
 
-export function findSlackUserByGithubUser(developers: Developer[], githubUserName: string) {
+export function findDeveloperByGithubUser(developers: Developer[], githubUserName: string) {
   return developers.find(user => user.githubUserName === githubUserName);
 }
