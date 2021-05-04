@@ -14,7 +14,7 @@ export function sendMessage(args: ChatPostMessageArguments) {
 }
 
 export function sendMessageReviewApprovedMessage({
-  pullRequest: { repository, link, title, opener },
+  pullRequest: { repository, link, title, owner },
   reviewComment: { reviewer },
 }: {
   pullRequest: GithubPullRequest;
@@ -43,7 +43,7 @@ export function sendMessageReviewApprovedMessage({
       text: {
         type: 'mrkdwn',
         text: `${createSlackMention(reviewer)}님이 ${createSlackMention(
-          opener
+          owner
         )}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
       },
     },
@@ -71,7 +71,7 @@ export function sendMessageReviewApprovedMessage({
   });
 }
 
-export function sendMessagePullRequestReviewMessage({ reviewers, repository, opener, link, title }: GithubPullRequest) {
+export function sendMessagePullRequestReviewMessage({ reviewers, repository, owner, link, title }: GithubPullRequest) {
   const reviewerNames = reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
     .filter(v => v != null)
@@ -100,7 +100,7 @@ export function sendMessagePullRequestReviewMessage({ reviewers, repository, ope
       text: {
         type: 'mrkdwn',
         text: `${createSlackMention(
-          opener
+          owner
         )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
       },
     },

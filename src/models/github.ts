@@ -41,7 +41,7 @@ export interface GithubPullRequest {
   body: string;
   link: string;
   reviewers: Developer[];
-  opener: Developer;
+  owner: Developer;
   repository: string;
 }
 

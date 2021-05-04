@@ -25,15 +25,15 @@ export function isApprovedCodeReview() {
 
 async function getCodeOwners() {
   const filePath = path.join(process.env.GITHUB_WORKSPACE ?? './', CODEOWNERS_PATH);
-  const opener = await getPullRequestOpener();
+  const pullRequestOwner = await getPullRequestOwner();
   try {
     const contents = await readFile(filePath);
-    const owners = contents
+    const codeOwners = contents
       .replace(/\*\s/, '')
       .split(/\s/)
       .map(member => member.replace('@', ''))
-      .filter(owner => owner !== opener.githubUserName);
-    return owners;
+      .filter(owner => owner !== pullRequestOwner.githubUserName);
+    return codeOwners;
   } catch {
     return [];
   }
@@ -55,14 +55,15 @@ async function getAssignedPullRequestReviewers() {
     .filter<Developer>((user): user is Developer => user != null);
 }
 
-async function getPullRequestOpener() {
+async function getPullRequestOwner() {
+  const { pull_request } = github.context.payload;
   const developers = await fetchDevelopers();
-  const sender = github.context.payload.sender as RawGithubUser;
+  const owner = pull_request?.user as RawGithubUser;
   return (
-    findDeveloperByGithubUser(developers, sender.login) ?? {
-      name: sender.login,
+    findDeveloperByGithubUser(developers, owner.login) ?? {
+      name: owner.login,
       slackUserId: '',
-      githubUserName: sender.login,
+      githubUserName: owner.login,
     }
   );
 }
@@ -92,10 +93,10 @@ function getRepositoryName() {
 export async function getPullRequest(): Promise<GithubPullRequest> {
   const { pull_request } = github.context.payload;
   const reviewers = await getAssignedPullRequestReviewers();
-  const opener = await getPullRequestOpener();
+  const owner = await getPullRequestOwner();
   const repository = getRepositoryName() ?? '';
 
-  core.info(`PR 생성자는 ${opener.name} 입니다`);
+  core.info(`PR 생성자는 ${owner.name} 입니다`);
   core.info(`🔥 최종 PR 리뷰어는 ${reviewers.map(reviewer => reviewer.name).join(',')} 입니다.`);
 
   return {
@@ -103,7 +104,7 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
     body: pull_request?.body ?? '',
     link: (pull_request?._links.html.href ?? '') as string,
     reviewers,
-    opener,
+    owner,
     repository,
   };
 }
