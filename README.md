@@ -7,7 +7,7 @@
 
 ```yaml
 name: Sample Action
-on: [pull_request]
+on: [pull_request, pull_request_review]
 
 jobs:
   create-pr:
@@ -17,9 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
       - name: Fire Notification
-        uses: Lubycon/github-reviewer-slack-noti-action@v1.3.0
+        uses: Lubycon/github-reviewer-slack-noti-action@v1.2.0
         with:
-          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-bot-token: ${{ secrets.LUBYCON_SLACK_BOT_TOKEN }}
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
           channel-id: 'my-slack-channel-id'
 ```
