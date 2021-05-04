@@ -1,9 +1,10 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import path from 'path';
-import { GithubPullRequest } from '../models/github';
-import { Developer, GithubUser } from '../models/developer';
-import { fetchDevelopers, findSlackUserByGithubUser } from './user';
+import { GithubPullRequest, GithubReviewComment, RawGithubReviewComment } from '../models/github';
+import { Developer } from '../models/developer';
+import { RawGithubUser } from '../models/github';
+import { fetchDevelopers, findDeveloperByGithubUser } from './user';
 import { readFile } from './file';
 import { CODEOWNERS_PATH } from '../constants/github';
 
@@ -14,6 +15,12 @@ export function isReadyCodeReview() {
     payload.action === 'opened' || payload.action === 'reopened' || payload.action === 'ready_for_review';
 
   return isPullReqeustEvent && isReadyForReview;
+}
+
+export function isApprovedCodeReview() {
+  const { eventName, payload } = github.context;
+  const isReviewEvent = eventName === 'pull_request_review';
+  return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
 }
 
 async function getCodeOwners() {
@@ -32,11 +39,11 @@ async function getCodeOwners() {
   }
 }
 
-async function getPullRequestReviewers() {
+async function getAssignedPullRequestReviewers() {
   const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
   const codeOwners = await getCodeOwners();
-  const prReviewers: GithubUser[] = pull_request?.requested_reviewers;
+  const prReviewers: RawGithubUser[] = pull_request?.requested_reviewers;
 
   const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
 
@@ -44,18 +51,35 @@ async function getPullRequestReviewers() {
   core.info(`PR에 입력된 리뷰어는 ${prReviewers.join(',')} 입니다`);
 
   return reviewers
-    .map(user => findSlackUserByGithubUser(developers, user))
+    .map(user => findDeveloperByGithubUser(developers, user))
     .filter<Developer>((user): user is Developer => user != null);
 }
 
 async function getPullRequestOpener() {
   const developers = await fetchDevelopers();
-  const sender = github.context.payload.sender as GithubUser;
+  const sender = github.context.payload.sender as RawGithubUser;
   return (
-    findSlackUserByGithubUser(developers, sender.login) ?? {
+    findDeveloperByGithubUser(developers, sender.login) ?? {
       name: sender.login,
       slackUserId: '',
       githubUserName: sender.login,
+    }
+  );
+}
+
+function getPullReuqestReviewComment() {
+  return github.context.payload.review as RawGithubReviewComment;
+}
+
+async function getPullRequestReviewCommentOwner() {
+  const developers = await fetchDevelopers();
+  const rawReview = getPullReuqestReviewComment();
+  const rawGithubUser = rawReview.user.login;
+  return (
+    findDeveloperByGithubUser(developers, rawGithubUser) ?? {
+      name: rawGithubUser,
+      slackUserId: '',
+      githubUserName: rawGithubUser,
     }
   );
 }
@@ -67,7 +91,7 @@ function getRepositoryName() {
 
 export async function getPullRequest(): Promise<GithubPullRequest> {
   const { pull_request } = github.context.payload;
-  const reviewers = await getPullRequestReviewers();
+  const reviewers = await getAssignedPullRequestReviewers();
   const opener = await getPullRequestOpener();
   const repository = getRepositoryName() ?? '';
 
@@ -81,5 +105,17 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
     reviewers,
     opener,
     repository,
+  };
+}
+
+export async function getReviewComment(): Promise<GithubReviewComment> {
+  const comment = getPullReuqestReviewComment();
+  const reviewer = await getPullRequestReviewCommentOwner();
+
+  core.info(`${reviewer.name}님의 Approve를 감지했습니다`);
+
+  return {
+    reviewer,
+    state: comment.state,
   };
 }

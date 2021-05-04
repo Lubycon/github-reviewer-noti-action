@@ -1,70 +1,38 @@
 import { ChatPostMessageArguments, WebClient } from '@slack/web-api';
 import { SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
 import { Developer } from '../models/developer';
-import { GithubPullRequest } from '../models/github';
-
-interface ReviewRequestMessageArguments {
-  title: string;
-  contents: string;
-  repositoryName: string;
-  pullRequestTitle: string;
-  pullRequestLink: string;
-}
+import { GithubPullRequest, GithubReviewComment } from '../models/github';
 
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 
 export function createSlackMention(developer: Developer) {
-  // return `<@${developer.slackUserId}>`;
-  return developer.name;
-}
-
-export function createPullRequestReviewMessage({
-  reviewers,
-  repository,
-  opener,
-  link,
-  title,
-}: GithubPullRequest): ReviewRequestMessageArguments {
-  const reviewerNames = reviewers
-    .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
-    .filter(v => v != null)
-    .join(',');
-
-  return {
-    title: `새로운 Pull Request가 오픈되었어요 :eyes:`,
-    contents: `${createSlackMention(
-      opener
-    )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
-    repositoryName: repository,
-    pullRequestTitle: title,
-    pullRequestLink: link,
-  };
+  return `<@${developer.slackUserId}>`;
 }
 
 export function sendMessage(args: ChatPostMessageArguments) {
   return slackClient.chat.postMessage(args);
 }
 
-export function sendMessagePullRequestReviewMessage({
-  title,
-  contents,
-  repositoryName,
-  pullRequestTitle,
-  pullRequestLink,
-}: ReviewRequestMessageArguments) {
+export function sendMessageReviewApprovedMessage({
+  pullRequest: { repository, link, title, opener },
+  reviewComment: { reviewer },
+}: {
+  pullRequest: GithubPullRequest;
+  reviewComment: GithubReviewComment;
+}) {
   const blocks = [
     {
       type: 'header',
       text: {
         type: 'plain_text',
-        text: title,
+        text: 'Pull Request가 승인되었어요! :white_check_mark:',
       },
     },
     {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${repositoryName}* < <${pullRequestLink}|${pullRequestTitle}>`,
+        text: `*${repository}* < <${link}|${title}>`,
       },
     },
     {
@@ -74,7 +42,66 @@ export function sendMessagePullRequestReviewMessage({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: contents,
+        text: `${createSlackMention(reviewer)}님이 ${createSlackMention(
+          opener
+        )}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
+      },
+    },
+    {
+      type: 'actions',
+      elements: [
+        {
+          type: 'button',
+          text: {
+            type: 'plain_text',
+            text: '머지하러가기 :partymerge:',
+            emoji: true,
+          },
+          style: 'primary',
+          url: link,
+        },
+      ],
+    },
+  ];
+
+  return sendMessage({
+    channel: TARGET_SLACK_CHANNEL_ID,
+    text: '',
+    blocks,
+  });
+}
+
+export function sendMessagePullRequestReviewMessage({ reviewers, repository, opener, link, title }: GithubPullRequest) {
+  const reviewerNames = reviewers
+    .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
+    .filter(v => v != null)
+    .join(',');
+
+  const blocks = [
+    {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: '새로운 Pull Request가 오픈되었어요 :eyes:',
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${repository}* < <${link}|${title}>`,
+      },
+    },
+    {
+      type: 'divider',
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `${createSlackMention(
+          opener
+        )}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
       },
     },
     {
@@ -88,13 +115,13 @@ export function sendMessagePullRequestReviewMessage({
             emoji: true,
           },
           style: 'primary',
-          url: pullRequestLink,
+          url: link,
         },
       ],
     },
   ];
 
-  sendMessage({
+  return sendMessage({
     channel: TARGET_SLACK_CHANNEL_ID,
     text: '',
     blocks,
