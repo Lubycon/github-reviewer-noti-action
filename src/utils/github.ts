@@ -10,7 +10,8 @@ import { CODEOWNERS_PATH } from '../constants/github';
 export function isReadyCodeReview() {
   const { eventName, payload } = github.context;
   const isPullReqeustEvent = eventName === 'pull_request';
-  const isReadyForReview = payload.action === 'opened' || payload.action === 'ready_for_review';
+  const isReadyForReview =
+    payload.action === 'opened' || payload.action === 'reopened' || payload.action === 'ready_for_review';
 
   return isPullReqeustEvent && isReadyForReview;
 }

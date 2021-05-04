@@ -1,8 +1,15 @@
 import * as core from '@actions/core';
+import * as github from '@actions/github';
 import { createPullRequestReviewMessage, sendMessagePullRequestReviewMessage } from './utils/slack';
 import { getPullRequest, isReadyCodeReview } from './utils/github';
 
+const { eventName, payload } = github.context;
+
 async function main() {
+  core.info('🔥 Run.....');
+  core.info(`eventName = ${eventName}`);
+  core.info(`action = ${payload.action}`);
+
   if (!isReadyCodeReview()) {
     return;
   }
