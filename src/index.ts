@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { sendMessageReviewApprovedMessage, sendMessagePullRequestReviewMessage } from './utils/slack';
-import { getPullRequest, getReviewComment, isApprovedCodeReview, isReadyCodeReview } from './utils/github';
+import { sendMessagePullRequestReviewMessage } from './utils/slack';
+import { getPullRequest, isApprovedCodeReview, isReadyCodeReview } from './utils/github';
 import { SUPPROTED_EVENTS } from 'constants/github';
 
 const { eventName, payload } = github.context;
