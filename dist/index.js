@@ -1,7 +1,7 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 9557:
+/***/ 1041:
 /***/ ((module) => {
 
 "use strict";
@@ -4326,7 +4326,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getUserAgent = exports.addAppMetadata = void 0;
 const os = __importStar(__nccwpck_require__(2087));
-const packageJson = __nccwpck_require__(9557); // tslint:disable-line:no-require-imports no-var-requires
+const packageJson = __nccwpck_require__(1041); // tslint:disable-line:no-require-imports no-var-requires
 /**
  * Replaces occurrences of '/' with ':' in a string, since '/' is meaningful inside User-Agent strings as a separator.
  */
@@ -11241,7 +11241,7 @@ module.exports = {
 // We support Browserify by skipping automatic module discovery and requiring modules directly.
 var modules = [
     __nccwpck_require__(2376),
-    __nccwpck_require__(5485),
+    __nccwpck_require__(9557),
     __nccwpck_require__(1155),
     __nccwpck_require__(1644),
     __nccwpck_require__(6657),
@@ -12398,7 +12398,7 @@ function detectEncoding(bufs, defaultEncoding) {
 
 /***/ }),
 
-/***/ 5485:
+/***/ 9557:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -17709,6 +17709,8 @@ const {
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(2186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: ./node_modules/@slack/web-api/dist/index.js
 var dist = __nccwpck_require__(431);
 ;// CONCATENATED MODULE: ./src/utils/input.ts
@@ -17724,36 +17726,23 @@ const slackClient = new dist.WebClient(SLACK_BOT_TOKEN);
 function createSlackMention(developer) {
     return `<@${developer.slackUserId}>`;
 }
-function createPullRequestReviewMessage({ reviewers, repository, opener, link, title, }) {
-    const reviewerNames = reviewers
-        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
-        .filter(v => v != null)
-        .join(',');
-    return {
-        title: `새로운 Pull Request가 오픈되었어요 :eyes:`,
-        contents: `${createSlackMention(opener)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
-        repositoryName: repository,
-        pullRequestTitle: title,
-        pullRequestLink: link,
-    };
-}
 function sendMessage(args) {
     return slackClient.chat.postMessage(args);
 }
-function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, pullRequestTitle, pullRequestLink, }) {
+function sendMessageReviewApprovedMessage({ pullRequest: { repository, link, title, owner }, reviewComment: { reviewer }, }) {
     const blocks = [
         {
             type: 'header',
             text: {
                 type: 'plain_text',
-                text: title,
+                text: 'Pull Request가 승인되었어요! :white_check_mark:',
             },
         },
         {
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: `*${repositoryName}* < <${pullRequestLink}|${pullRequestTitle}>`,
+                text: `*${repository}* < <${link}|${title}>`,
             },
         },
         {
@@ -17763,7 +17752,59 @@ function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, 
             type: 'section',
             text: {
                 type: 'mrkdwn',
-                text: contents,
+                text: `${createSlackMention(reviewer)}님이 ${createSlackMention(owner)}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
+            },
+        },
+        {
+            type: 'actions',
+            elements: [
+                {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: '머지하러가기 :partymerge:',
+                        emoji: true,
+                    },
+                    style: 'primary',
+                    url: link,
+                },
+            ],
+        },
+    ];
+    return sendMessage({
+        channel: TARGET_SLACK_CHANNEL_ID,
+        text: '',
+        blocks,
+    });
+}
+function sendMessagePullRequestReviewMessage({ reviewers, repository, owner, link, title }) {
+    const reviewerNames = reviewers
+        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
+        .filter(v => v != null)
+        .join(',');
+    const blocks = [
+        {
+            type: 'header',
+            text: {
+                type: 'plain_text',
+                text: '새로운 Pull Request가 오픈되었어요 :eyes:',
+            },
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*${repository}* < <${link}|${title}>`,
+            },
+        },
+        {
+            type: 'divider',
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `${createSlackMention(owner)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
             },
         },
         {
@@ -17777,20 +17818,18 @@ function sendMessagePullRequestReviewMessage({ title, contents, repositoryName, 
                         emoji: true,
                     },
                     style: 'primary',
-                    url: pullRequestLink,
+                    url: link,
                 },
             ],
         },
     ];
-    sendMessage({
+    return sendMessage({
         channel: TARGET_SLACK_CHANNEL_ID,
         text: '',
         blocks,
     });
 }
 
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
 // EXTERNAL MODULE: external "path"
 var external_path_ = __nccwpck_require__(5622);
 var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
@@ -17806,7 +17845,7 @@ function fetchDevelopers() {
         return response.json();
     });
 }
-function findSlackUserByGithubUser(developers, githubUserName) {
+function findDeveloperByGithubUser(developers, githubUserName) {
     return developers.find(user => user.githubUserName === githubUserName);
 }
 
@@ -17830,6 +17869,7 @@ function readFile(file) {
 
 ;// CONCATENATED MODULE: ./src/constants/github.ts
 const CODEOWNERS_PATH = './.github/CODEOWNERS';
+const SUPPROTED_EVENTS = ['pull_request', 'pull_request_review'];
 
 ;// CONCATENATED MODULE: ./src/utils/github.ts
 
@@ -17842,29 +17882,34 @@ const CODEOWNERS_PATH = './.github/CODEOWNERS';
 function isReadyCodeReview() {
     const { eventName, payload } = github.context;
     const isPullReqeustEvent = eventName === 'pull_request';
-    const isReadyForReview = payload.action === 'opened' || payload.action === 'ready_for_review';
+    const isReadyForReview = payload.action === 'opened' || payload.action === 'reopened' || payload.action === 'ready_for_review';
     return isPullReqeustEvent && isReadyForReview;
+}
+function isApprovedCodeReview() {
+    const { eventName, payload } = github.context;
+    const isReviewEvent = eventName === 'pull_request_review';
+    return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
 }
 function getCodeOwners() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const filePath = external_path_default().join((_a = process.env.GITHUB_WORKSPACE) !== null && _a !== void 0 ? _a : './', CODEOWNERS_PATH);
-        const opener = yield getPullRequestOpener();
+        const pullRequestOwner = yield getPullRequestOwner();
         try {
             const contents = yield readFile(filePath);
-            const owners = contents
+            const codeOwners = contents
                 .replace(/\*\s/, '')
                 .split(/\s/)
                 .map(member => member.replace('@', ''))
-                .filter(owner => owner !== opener.githubUserName);
-            return owners;
+                .filter(owner => owner !== pullRequestOwner.githubUserName);
+            return codeOwners;
         }
         catch (_b) {
             return [];
         }
     });
 }
-function getPullRequestReviewers() {
+function getAssignedPullRequestReviewers() {
     return __awaiter(this, void 0, void 0, function* () {
         const developers = yield fetchDevelopers();
         const { pull_request } = github.context.payload;
@@ -17874,19 +17919,36 @@ function getPullRequestReviewers() {
         core.info(`코드오너는 ${codeOwners.join(',')}입니다`);
         core.info(`PR에 입력된 리뷰어는 ${prReviewers.join(',')} 입니다`);
         return reviewers
-            .map(user => findSlackUserByGithubUser(developers, user))
+            .map(user => findDeveloperByGithubUser(developers, user))
             .filter((user) => user != null);
     });
 }
-function getPullRequestOpener() {
+function getPullRequestOwner() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const { pull_request } = github.context.payload;
+        const developers = yield fetchDevelopers();
+        const owner = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user;
+        return ((_a = findDeveloperByGithubUser(developers, owner.login)) !== null && _a !== void 0 ? _a : {
+            name: owner.login,
+            slackUserId: '',
+            githubUserName: owner.login,
+        });
+    });
+}
+function getPullReuqestReviewComment() {
+    return github.context.payload.review;
+}
+function getPullRequestReviewCommentOwner() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const developers = yield fetchDevelopers();
-        const sender = github.context.payload.sender;
-        return ((_a = findSlackUserByGithubUser(developers, sender.login)) !== null && _a !== void 0 ? _a : {
-            name: sender.login,
+        const rawReview = getPullReuqestReviewComment();
+        const rawGithubUser = rawReview.user.login;
+        return ((_a = findDeveloperByGithubUser(developers, rawGithubUser)) !== null && _a !== void 0 ? _a : {
+            name: rawGithubUser,
             slackUserId: '',
-            githubUserName: sender.login,
+            githubUserName: rawGithubUser,
         });
     });
 }
@@ -17898,18 +17960,29 @@ function getPullRequest() {
     var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         const { pull_request } = github.context.payload;
-        const reviewers = yield getPullRequestReviewers();
-        const opener = yield getPullRequestOpener();
+        const reviewers = yield getAssignedPullRequestReviewers();
+        const owner = yield getPullRequestOwner();
         const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
-        core.info(`PR 생성자는 ${opener.name} 입니다`);
+        core.info(`PR 생성자는 ${owner.name} 입니다`);
         core.info(`🔥 최종 PR 리뷰어는 ${reviewers.map(reviewer => reviewer.name).join(',')} 입니다.`);
         return {
             title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
             body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
             link: ((_d = pull_request === null || pull_request === void 0 ? void 0 : pull_request._links.html.href) !== null && _d !== void 0 ? _d : ''),
             reviewers,
-            opener,
+            owner,
             repository,
+        };
+    });
+}
+function getReviewComment() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comment = getPullReuqestReviewComment();
+        const reviewer = yield getPullRequestReviewCommentOwner();
+        core.info(`${reviewer.name}님의 Approve를 감지했습니다`);
+        return {
+            reviewer,
+            state: comment.state,
         };
     });
 }
@@ -17919,23 +17992,37 @@ function getPullRequest() {
 
 
 
+
+
+const { eventName, payload } = github.context;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!isReadyCodeReview()) {
+        core.info('🔥 Run.....');
+        core.info(`eventName = ${eventName}`);
+        core.info(`action = ${payload.action}`);
+        if (!SUPPROTED_EVENTS.includes(eventName)) {
+            core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
             return;
         }
-        try {
-            const pullRequest = yield getPullRequest();
-            core.info(JSON.stringify(pullRequest));
-            const message = createPullRequestReviewMessage(pullRequest);
-            sendMessagePullRequestReviewMessage(message);
+        const pullRequest = yield getPullRequest();
+        if (isReadyCodeReview()) {
+            core.info('Pull Request 오픈이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+            yield sendMessagePullRequestReviewMessage(pullRequest);
         }
-        catch (e) {
-            core.setFailed(e.message);
+        else if (isApprovedCodeReview()) {
+            core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+            const reviewComment = yield getReviewComment();
+            yield sendMessageReviewApprovedMessage({ pullRequest, reviewComment });
         }
+        core.info('👋 Done');
     });
 }
-main();
+try {
+    main();
+}
+catch (e) {
+    core.setFailed(e);
+}
 
 })();
 
