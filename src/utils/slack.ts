@@ -1,7 +1,8 @@
 import { ChatPostMessageArguments, WebClient } from '@slack/web-api';
 import { SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
 import { Developer } from '../models/developer';
-import { GithubPullRequest, GithubReviewComment } from '../models/github';
+import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from '../models/github';
+import { replaceGithubUserToSlackUserInString } from './user';
 
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 
@@ -15,10 +16,10 @@ export function sendMessage(args: ChatPostMessageArguments) {
 
 export function sendMessageReviewApprovedMessage({
   pullRequest: { repository, link, title, owner },
-  reviewComment: { reviewer },
+  review: { author, message },
 }: {
   pullRequest: GithubPullRequest;
-  reviewComment: GithubReviewComment;
+  review: GithubPullRequestReview;
 }) {
   const blocks = [
     {
@@ -42,9 +43,16 @@ export function sendMessageReviewApprovedMessage({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `${createSlackMention(reviewer)}님이 ${createSlackMention(
+        text: `${createSlackMention(author)}님이 ${createSlackMention(
           owner
         )}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: replaceGithubUserToSlackUserInString(message),
       },
     },
     {
@@ -118,6 +126,37 @@ export function sendMessagePullRequestReviewMessage({ reviewers, repository, own
           url: link,
         },
       ],
+    },
+  ];
+
+  return sendMessage({
+    channel: TARGET_SLACK_CHANNEL_ID,
+    text: '',
+    blocks,
+  });
+}
+
+export function sendGithubPullRequestCommentMessage({
+  pullRequest: { repository, link, title },
+  comment,
+}: {
+  pullRequest: GithubPullRequest;
+  comment: GithubPullRequestComment;
+}) {
+  const blocks = [
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: `*${repository}* < <${link}|${title}> 풀리퀘스트에 새로운 댓글이 달렸어요`,
+      },
+    },
+    {
+      type: 'section',
+      text: {
+        type: 'mrkdwn',
+        text: replaceGithubUserToSlackUserInString(comment.message),
+      },
     },
   ];
 
