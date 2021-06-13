@@ -1,5 +1,5 @@
 name: Test Run
-on: [pull_request, pull_request_review]
+on: [pull_request, pull_request_review, pull_request_review_comment]
 
 jobs:
   build:

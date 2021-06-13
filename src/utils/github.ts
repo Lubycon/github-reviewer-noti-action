@@ -23,6 +23,12 @@ export function isApprovedCodeReview() {
   return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
 }
 
+export function isCreatedPullRequestComment() {
+  const { eventName, payload } = github.context;
+  const isPullRequestCommentEvent = eventName === 'pull_request_review_comment';
+  return isPullRequestCommentEvent && payload.action === 'created';
+}
+
 async function getCodeOwners() {
   const filePath = path.join(process.env.GITHUB_WORKSPACE ?? './', CODEOWNERS_PATH);
   const pullRequestOwner = await getPullRequestOwner();
