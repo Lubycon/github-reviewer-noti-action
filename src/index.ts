@@ -17,6 +17,7 @@ async function main() {
   core.info('🔥 Run.....');
   core.info(`eventName = ${eventName}`);
   core.info(`action = ${payload.action}`);
+  core.info(JSON.stringify(payload, null, 2));
 
   if (!SUPPROTED_EVENTS.includes(eventName)) {
     core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
