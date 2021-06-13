@@ -16,6 +16,12 @@ function isApprovedCodeReview() {
   return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
 }
 
+function isCodeReview() {
+  const { eventName, payload } = github.context;
+  const isReviewEvent = eventName === 'pull_request_review';
+  return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'commented';
+}
+
 function isCreatedPullRequestComment() {
   const { eventName, payload } = github.context;
   const isPullRequestCommentEvent = eventName === 'pull_request_review_comment';
@@ -31,9 +37,13 @@ export function parseGithubEvent(): GithubActionEvent | null {
     return {
       type: GithubActionEventName.PR머지승인,
     };
-  } else if (isCreatedPullRequestComment()) {
+  } else if (isCodeReview()) {
     return {
       type: GithubActionEventName.PR리뷰코멘트,
+    };
+  } else if (isCreatedPullRequestComment()) {
+    return {
+      type: GithubActionEventName.PR댓글,
     };
   }
 
