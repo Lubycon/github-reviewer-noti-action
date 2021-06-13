@@ -89,7 +89,7 @@ export async function getPullRequestReview(): Promise<GithubPullRequestReview> {
 
   return {
     author,
-    message: review.body ?? '',
+    message: review.body,
     state: review.state,
   };
 }

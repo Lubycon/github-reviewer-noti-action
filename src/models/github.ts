@@ -61,7 +61,6 @@ export enum GithubActionEventName {
   PR열림 = 'CREATED_PULL_REQUEST',
   PR머지승인 = 'APPROVED_PULL_REQUEST',
   PR리뷰코멘트 = 'COMMENTED_PULL_REQUEST',
-  PR댓글 = 'COMMENTED_PULL_REQUEST',
 }
 
 export interface GithubActionEvent {
