@@ -102,9 +102,6 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
   const owner = await getPullRequestOwner();
   const repository = getRepositoryName() ?? '';
 
-  core.info(`PR 생성자는 ${owner.name} 입니다`);
-  core.info(`🔥 최종 PR 리뷰어는 ${reviewers.map(reviewer => reviewer.name).join(',')} 입니다.`);
-
   return {
     title: (pull_request?.title ?? '') as string,
     body: pull_request?.body ?? '',
@@ -115,11 +112,9 @@ export async function getPullRequest(): Promise<GithubPullRequest> {
   };
 }
 
-export async function getReviewComment(): Promise<GithubReviewComment> {
+export async function getReviewApproveComment(): Promise<GithubReviewComment> {
   const comment = getPullReuqestReviewComment();
   const reviewer = await getPullRequestReviewCommentOwner();
-
-  core.info(`${reviewer.name}님의 Approve를 감지했습니다`);
 
   return {
     reviewer,
