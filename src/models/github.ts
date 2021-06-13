@@ -21,9 +21,9 @@ export interface RawGithubUser {
   url: string;
 }
 
-type GithubReviewCommentState = 'approved' | 'commented';
+type GithubPullRequestReviewState = 'approved' | 'commented';
 
-export interface RawGithubReviewComment {
+export interface RawGithubPullRequestComment {
   author_association: string;
   body: string;
   commit_id: string;
@@ -31,9 +31,12 @@ export interface RawGithubReviewComment {
   id: number;
   node_id: string;
   pull_request_url: string;
-  state: GithubReviewCommentState;
   submitted_at: string;
   user: RawGithubUser;
+}
+
+export interface RawGithubPullRequestReview extends RawGithubPullRequestComment {
+  state: GithubPullRequestReviewState;
 }
 
 export interface GithubPullRequest {
@@ -45,7 +48,21 @@ export interface GithubPullRequest {
   repository: string;
 }
 
-export interface GithubReviewComment {
-  reviewer: Developer;
-  state: GithubReviewCommentState;
+export interface GithubPullRequestComment {
+  author: Developer;
+  message: string;
+}
+
+export interface GithubPullRequestReview extends GithubPullRequestComment {
+  state: GithubPullRequestReviewState;
+}
+
+export enum GithubActionEventName {
+  PR열림 = 'CREATED_PULL_REQUEST',
+  PR머지승인 = 'APPROVED_PULL_REQUEST',
+  PR리뷰코멘트 = 'COMMENTED_PULL_REQUEST',
+}
+
+export interface GithubActionEvent {
+  type: GithubActionEventName;
 }

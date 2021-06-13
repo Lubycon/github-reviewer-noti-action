@@ -1,8 +1,15 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { sendMessagePullRequestReviewMessage, sendMessageReviewApprovedMessage } from './utils/slack';
-import { getPullRequest, getReviewComment, isApprovedCodeReview, isReadyCodeReview } from './utils/github';
-import { SUPPROTED_EVENTS } from './constants/github';
+import { SUPPROTED_EVENTS } from 'constants/github';
+import {
+  sendGithubPullRequestCommentMessage,
+  sendMessagePullRequestReviewMessage,
+  sendMessageReviewApprovedMessage,
+} from 'utils/slack';
+import { getPullRequest, getPullRequestComment, getPullRequestReview } from 'utils/github/pullRequests';
+import { parseGithubEvent } from 'utils/github/events';
+import { GithubActionEventName } from 'models/github';
+import { hasMentionInMessage } from 'utils/user';
 
 const { eventName, payload } = github.context;
 
@@ -17,14 +24,34 @@ async function main() {
   }
 
   const pullRequest = await getPullRequest();
+  const githubEvent = parseGithubEvent();
 
-  if (isReadyCodeReview()) {
-    core.info('Pull Request 오픈이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-    await sendMessagePullRequestReviewMessage(pullRequest);
-  } else if (isApprovedCodeReview()) {
-    core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-    const reviewComment = await getReviewComment();
-    await sendMessageReviewApprovedMessage({ pullRequest, reviewComment });
+  if (githubEvent == null) {
+    return;
+  }
+
+  switch (githubEvent.type) {
+    case GithubActionEventName.PR열림: {
+      core.info('Pull Request 오픈이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+      await sendMessagePullRequestReviewMessage(pullRequest);
+      break;
+    }
+    case GithubActionEventName.PR머지승인: {
+      core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+      const review = await getPullRequestReview();
+      await sendMessageReviewApprovedMessage({ pullRequest, review });
+      break;
+    }
+    case GithubActionEventName.PR리뷰코멘트: {
+      const comment = await getPullRequestComment();
+
+      if (hasMentionInMessage(comment.message)) {
+        core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+        await sendGithubPullRequestCommentMessage({ pullRequest, comment });
+      }
+
+      break;
+    }
   }
 
   core.info('👋 Done');
