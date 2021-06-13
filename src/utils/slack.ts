@@ -16,7 +16,7 @@ export function sendMessage(args: ChatPostMessageArguments) {
 
 export function sendMessageReviewApprovedMessage({
   pullRequest: { repository, link, title, owner },
-  review: { author, message },
+  review: { author },
 }: {
   pullRequest: GithubPullRequest;
   review: GithubPullRequestReview;
@@ -46,13 +46,6 @@ export function sendMessageReviewApprovedMessage({
         text: `${createSlackMention(author)}님이 ${createSlackMention(
           owner
         )}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
-      },
-    },
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: replaceGithubUserToSlackUserInString(message),
       },
     },
     {
