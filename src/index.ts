@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import { sendMessagePullRequestReviewMessage, sendMessageReviewApprovedMessage } from './utils/slack';
 import {
   getPullRequest,
-  getReviewComment,
+  getReviewApproveComment,
   isApprovedCodeReview,
   isReadyCodeReview,
   isCreatedPullRequestComment,
@@ -29,12 +29,11 @@ async function main() {
     await sendMessagePullRequestReviewMessage(pullRequest);
   } else if (isApprovedCodeReview()) {
     core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-    const reviewComment = await getReviewComment();
+    const reviewComment = await getReviewApproveComment();
     await sendMessageReviewApprovedMessage({ pullRequest, reviewComment });
   } else if (isCreatedPullRequestComment()) {
     core.info('Pull Request에 새로운 댓글이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-    const reviewComment = await getReviewComment();
-    core.info(JSON.stringify(reviewComment, null, 2));
+    core.info(JSON.stringify(payload.comment, null, 2));
   }
 
   core.info('👋 Done');
