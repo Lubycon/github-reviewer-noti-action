@@ -136,7 +136,7 @@ export function sendMessagePullRequestReviewMessage({ reviewers, repository, own
   });
 }
 
-export function sendGithubPullRequestCommentMessage({
+export async function sendGithubPullRequestCommentMessage({
   pullRequest: { repository, link, title },
   comment,
 }: {
@@ -155,7 +155,7 @@ export function sendGithubPullRequestCommentMessage({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: replaceGithubUserToSlackUserInString(comment.message),
+        text: await replaceGithubUserToSlackUserInString(comment.message),
       },
     },
   ];
