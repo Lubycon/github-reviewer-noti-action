@@ -43,14 +43,6 @@ async function main() {
       break;
     }
     case GithubActionEventName.PR리뷰코멘트: {
-      const comment = await getPullRequestReview();
-      if (hasMentionInMessage(comment.message)) {
-        core.info('Pull Request에 멘션이 포함된 새로운 리뷰 댓글이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-        await sendGithubPullRequestCommentMessage({ pullRequest, comment });
-      }
-      break;
-    }
-    case GithubActionEventName.PR댓글: {
       const comment = await getPullRequestComment();
 
       if (hasMentionInMessage(comment.message)) {

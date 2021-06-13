@@ -97,7 +97,7 @@ export function sendMessagePullRequestReviewMessage({ reviewers, repository, own
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${repository}* < <${link}|${title}>`,
+        text: `*${repository}* > <${link}|${title}>`,
       },
     },
     {
@@ -148,7 +148,7 @@ export async function sendGithubPullRequestCommentMessage({
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${repository}* < <${link}|${title}> 풀리퀘스트에 새로운 댓글이 달렸어요`,
+        text: `*${repository}* > <${link}|${title}> 풀리퀘스트에 새로운 댓글이 달렸어요`,
       },
     },
     {

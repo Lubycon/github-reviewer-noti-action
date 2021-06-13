@@ -1,4 +1,3 @@
-import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { Developer } from 'models/developer';
 import {
@@ -32,9 +31,6 @@ export async function getAssignedPullRequestReviewers() {
   const prReviewers: RawGithubUser[] = pull_request?.requested_reviewers;
 
   const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
-
-  core.info(`코드오너는 ${codeOwners.join(',')}입니다`);
-  core.info(`PR에 입력된 리뷰어는 ${prReviewers.join(',')} 입니다`);
 
   return reviewers
     .map(user => findDeveloperByGithubUser(developers, user))
