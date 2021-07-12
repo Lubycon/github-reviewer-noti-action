@@ -8,20 +8,14 @@ import {
   GithubPullRequestComment,
   RawGithubPullRequestComment,
 } from 'models/github';
-import { fetchDevelopers, findDeveloperByGithubUser } from 'utils/user';
+import { fetchDevelopers, getDeveloperByGithubUser } from 'utils/user';
 import { getCodeOwners, getRepositoryName } from './repositories';
 
 export async function getPullRequestOwner() {
   const { pull_request } = github.context.payload;
   const developers = await fetchDevelopers();
   const owner = pull_request?.user as RawGithubUser;
-  return (
-    findDeveloperByGithubUser(developers, owner.login) ?? {
-      name: owner.login,
-      slackUserId: '',
-      githubUserName: owner.login,
-    }
-  );
+  return getDeveloperByGithubUser(developers, owner.login);
 }
 
 export async function getAssignedPullRequestReviewers() {
@@ -33,7 +27,7 @@ export async function getAssignedPullRequestReviewers() {
   const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
 
   return reviewers
-    .map(user => findDeveloperByGithubUser(developers, user))
+    .map(user => getDeveloperByGithubUser(developers, user))
     .filter<Developer>((user): user is Developer => user != null);
 }
 
@@ -48,13 +42,7 @@ export function getRawPullRequestComment() {
 export async function getDeveloperFromGithubUser(user: RawGithubUser) {
   const developers = await fetchDevelopers();
   const rawGithubUserName = user.login;
-  return (
-    findDeveloperByGithubUser(developers, rawGithubUserName) ?? {
-      name: rawGithubUserName,
-      slackUserId: '',
-      githubUserName: rawGithubUserName,
-    }
-  );
+  return getDeveloperByGithubUser(developers, rawGithubUserName);
 }
 
 export async function getPullRequest(): Promise<GithubPullRequest> {
