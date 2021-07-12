@@ -7,8 +7,15 @@ export async function fetchDevelopers(): Promise<Developer[]> {
   return response.json();
 }
 
-export function findDeveloperByGithubUser(developers: Developer[], githubUserName: string) {
-  return developers.find(user => user.githubUserName === githubUserName);
+export function getDeveloperByGithubUser(developers: Developer[], githubUserName: string) {
+  return (
+    developers.find(user => user.githubUserName === githubUserName) ?? {
+      name: githubUserName,
+      githubUserName: githubUserName,
+      slackUserId: githubUserName,
+      isExternalUser: true,
+    }
+  );
 }
 
 export function hasMentionInMessage(message: string) {
@@ -23,7 +30,7 @@ export async function replaceGithubUserToSlackUserInString(message: string) {
   return words
     .map(message => {
       const githubUser = message.replace('@', '');
-      const developer = findDeveloperByGithubUser(developers, githubUser);
+      const developer = getDeveloperByGithubUser(developers, githubUser);
 
       return developer == null ? message : createSlackMention(developer);
     })

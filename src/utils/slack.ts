@@ -7,7 +7,7 @@ import { replaceGithubUserToSlackUserInString } from './user';
 const slackClient = new WebClient(SLACK_BOT_TOKEN);
 
 export function createSlackMention(developer: Developer) {
-  return `<@${developer.slackUserId}>`;
+  return developer.isExternalUser === true ? developer.githubUserName : `<@${developer.slackUserId}>`;
 }
 
 export function sendMessage(args: ChatPostMessageArguments) {
