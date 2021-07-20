@@ -14,7 +14,7 @@ export function sendMessage(args: ChatPostMessageArguments) {
   return slackClient.chat.postMessage(args);
 }
 
-export function sendMessageReviewApprovedMessage({
+export function sendSlackMessageReviewApprovedMessage({
   pullRequest: { repository, link, title, owner },
   review: { author },
 }: {
@@ -72,7 +72,13 @@ export function sendMessageReviewApprovedMessage({
   });
 }
 
-export function sendMessagePullRequestReviewMessage({ reviewers, repository, owner, link, title }: GithubPullRequest) {
+export function sendSlackMessagePullRequestReviewMessage({
+  reviewers,
+  repository,
+  owner,
+  link,
+  title,
+}: GithubPullRequest) {
   const reviewerNames = reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
     .filter(v => v != null)
@@ -129,7 +135,7 @@ export function sendMessagePullRequestReviewMessage({ reviewers, repository, own
   });
 }
 
-export async function sendGithubPullRequestCommentMessage({
+export async function sendSlackGithubPullRequestCommentMessage({
   pullRequest: { repository, link, title },
   comment,
 }: {
@@ -138,11 +144,21 @@ export async function sendGithubPullRequestCommentMessage({
 }) {
   const blocks = [
     {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: 'Pull Request에 새로운 댓글이 달렸어요',
+      },
+    },
+    {
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `*${repository}* > <${link}|${title}> 풀리퀘스트에 새로운 댓글이 달렸어요`,
+        text: `*${repository}* > <${link}|${title}>`,
       },
+    },
+    {
+      type: 'divider',
     },
     {
       type: 'section',

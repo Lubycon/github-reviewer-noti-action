@@ -3,4 +3,5 @@ export interface Developer {
   githubUserName: string;
   slackUserId: string;
   isExternalUser?: true;
+  mattermostUserName?: string;
 }
