@@ -14,7 +14,7 @@ export function sendMessage(args: ChatPostMessageArguments) {
   return slackClient.chat.postMessage(args);
 }
 
-export function sendSlackMessageReviewApprovedMessage({
+export function sendReviewApprovedSlackMessage({
   pullRequest: { repository, link, title, owner },
   review: { author },
 }: {
@@ -72,13 +72,7 @@ export function sendSlackMessageReviewApprovedMessage({
   });
 }
 
-export function sendSlackMessagePullRequestReviewMessage({
-  reviewers,
-  repository,
-  owner,
-  link,
-  title,
-}: GithubPullRequest) {
+export function sendPullRequestReviewSlackMessage({ reviewers, repository, owner, link, title }: GithubPullRequest) {
   const reviewerNames = reviewers
     .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
     .filter(v => v != null)
@@ -135,7 +129,7 @@ export function sendSlackMessagePullRequestReviewMessage({
   });
 }
 
-export async function sendSlackGithubPullRequestCommentMessage({
+export async function sendPullRequestCommentSlackMessage({
   pullRequest: { repository, link, title },
   comment,
 }: {

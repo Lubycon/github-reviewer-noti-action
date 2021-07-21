@@ -2,13 +2,14 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { SUPPROTED_EVENTS } from 'constants/github';
 import {
-  sendSlackGithubPullRequestCommentMessage,
-  sendSlackMessagePullRequestReviewMessage,
-  sendSlackMessageReviewApprovedMessage,
+  sendReviewApprovedSlackMessage,
+  sendPullRequestReviewSlackMessage,
+  sendPullRequestCommentSlackMessage,
 } from 'utils/slack';
 import {
-  sendMattermostMessagePullRequestReviewMessage,
-  sendMattermostMessageReviewApprovedMessage,
+  sendPullRequestReviewMattermostMessage,
+  sendReviewApprovedMattermostMessage,
+  sendPullRequestCommentMattermostMessage,
 } from 'utils/mattermost';
 import { getPullRequest, getPullRequestComment, getPullRequestReview } from 'utils/github/pullRequests';
 import { parseGithubEvent } from 'utils/github/events';
@@ -38,20 +39,20 @@ async function main() {
   switch (githubEvent.type) {
     case GithubActionEventName.PR열림: {
       core.info('Pull Request 오픈이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-      await sendSlackMessagePullRequestReviewMessage(pullRequest);
+      await sendPullRequestReviewSlackMessage(pullRequest);
       if (MATTERMOST_HOST != null) {
         // PoC...
-        await sendMattermostMessagePullRequestReviewMessage(pullRequest);
+        await sendPullRequestReviewMattermostMessage(pullRequest);
       }
       break;
     }
     case GithubActionEventName.PR머지승인: {
       core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
       const review = await getPullRequestReview();
-      await sendSlackMessageReviewApprovedMessage({ pullRequest, review });
+      await sendReviewApprovedSlackMessage({ pullRequest, review });
       if (MATTERMOST_HOST != null) {
         // PoC...
-        await sendMattermostMessageReviewApprovedMessage({ pullRequest, review });
+        await sendReviewApprovedMattermostMessage({ pullRequest, review });
       }
       break;
     }
@@ -60,7 +61,11 @@ async function main() {
 
       if (hasMentionInMessage(comment.message)) {
         core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 슬랙 메세지를 보냅니다.');
-        await sendSlackGithubPullRequestCommentMessage({ pullRequest, comment });
+        await sendPullRequestCommentSlackMessage({ pullRequest, comment });
+        if (MATTERMOST_HOST != null) {
+          // PoC...
+          await sendPullRequestCommentMattermostMessage({ pullRequest, comment });
+        }
       }
 
       break;
