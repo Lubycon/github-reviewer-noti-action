@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { Developer } from '../models/developer';
+import { createMattermostMention } from './mattermost';
 import { createSlackMention } from './slack';
 
 export async function fetchDevelopers(): Promise<Developer[]> {
@@ -23,16 +24,24 @@ export function hasMentionInMessage(message: string) {
   return words.filter(word => word.includes('@')).length > 0;
 }
 
-export async function replaceGithubUserToSlackUserInString(message: string) {
+async function replaceGithubUserInString(message: string, replacer: (developer: Developer) => string) {
   const words = message.split(/\s/);
   const developers = await fetchDevelopers();
 
   return words
     .map(message => {
-      const githubUser = message.replace('@', '');
-      const developer = getDeveloperByGithubUser(developers, githubUser);
+      const githubUser = message.match(/@[a-z-_]+/)?.[0].replace('@', '');
+      const developer = getDeveloperByGithubUser(developers, githubUser ?? '');
 
-      return developer == null ? message : createSlackMention(developer);
+      return developer == null ? message : replacer(developer);
     })
     .join(' ');
+}
+
+export async function replaceGithubUserToSlackUserInString(message: string) {
+  return replaceGithubUserInString(message, createSlackMention);
+}
+
+export async function replaceGithubUserToMattermostUserInString(message: string) {
+  return replaceGithubUserInString(message, createMattermostMention);
 }
