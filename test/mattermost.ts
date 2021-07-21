@@ -1,5 +1,5 @@
 import {
-  sendGithubPullRequestCommentMattermostMessage,
+  sendPullRequestCommentMattermostMessage,
   sendPullRequestReviewMattermostMessage,
 } from '../src/utils/mattermost';
 
@@ -25,7 +25,7 @@ const main = async () => {
       },
       repository: 'test-repository',
     });
-    await sendGithubPullRequestCommentMattermostMessage({
+    await sendPullRequestCommentMattermostMessage({
       pullRequest: {
         title: '테스트 PR입니다',
         body: '테스트테스트',
