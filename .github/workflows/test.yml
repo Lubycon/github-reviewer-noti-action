@@ -33,4 +33,4 @@ jobs:
           slack-bot-token: ${{ secrets.LUBYCON_SLACK_BOT_TOKEN }}
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
           channel-id: C01UXTP3P4P
-          mattermost-host: https://mattermost.lubycon.io/hooks/bj5zk9se6fd5iy63csoefbr64c
+          mattermost-host: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
