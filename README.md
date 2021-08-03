@@ -17,17 +17,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
       - name: Fire Notification
-        uses: Lubycon/github-reviewer-slack-noti-action@v1.2.0
+        uses: Lubycon/github-reviewer-slack-noti-action@v1.5.1
         with:
           slack-bot-token: ${{ secrets.LUBYCON_SLACK_BOT_TOKEN }}
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
           channel-id: 'my-slack-channel-id'
+          mattermost-webhook: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
 ```
 
 ## Configuration
 
-| 이름              | 설명                                                                                               |
-| ----------------- | -------------------------------------------------------------------------------------------------- |
-| `slack-bot-token` | 메세지를 보낼 슬랙봇 토큰. 루비콘 멤버라면 루비콘의 Org Secrets에 저장된 토큰을 사용할 수 있습니다 |
-| `github-token`    | Github Personal Access Token. `repo` 스코프를 지정해서 생성해주세요                                |
-| `channel-id`      | 노티를 쏘고 싶은 슬랙 채널 ID                                                                      |
+| 이름                 | 설명                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------- |
+| `slack-bot-token`    | 메세지를 보낼 슬랙봇 토큰. 루비콘 멤버라면 루비콘의 Org Secrets에 저장된 토큰을 사용할 수 있습니다 |
+| `github-token`       | Github Personal Access Token. `repo` 스코프를 지정해서 생성해주세요                                |
+| `channel-id`         | 노티를 쏘고 싶은 슬랙 채널 ID                                                                      |
+| `mattermost-webhook` | 매터모스트 웹훅 URL (존재하면 매터모스트에도 노티를 보냅니다)                                      |
