@@ -1,11 +1,11 @@
 {
-  "name": "lubycon-github-reviwer-slack-notify-action",
+  "name": "lubycon-github-reviewer-notify-action",
   "version": "1.0.0",
   "description": "",
   "main": "src/index.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Lubycon/github-reviewer-slack-noti-action.git"
+    "url": "git+https://github.com/Lubycon/github-reviewer-noti-action.git"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -1,17 +1,14 @@
-name: 'Lubycon Github Reviewer Slack Notify'
+name: 'Lubycon Github Reviewer Notify'
 description: '루비콘 허브 내에서 사용되는 깃허브 PR 리뷰 노티피케이션 액션입니다'
 branding:
   color: blue
   icon: at-sign
 inputs:
-  slack-bot-token:
-    description: "OAuth token for your Slack App Bot to sign requests to Slack's API with."
-    required: true
-  channel-id:
-    description: 'ID of the channel or conversation in Slack you would like messages posted to.'
-    required: true
   github-token:
     description: 'Personal access token with repository rights.'
+    required: true
+  mattermost-webhook:
+    description: 'Mattermost Webhook URL.'
     required: true
 runs:
   using: 'node12'

@@ -1,20 +1,24 @@
 import fetch from 'node-fetch';
-import { Developer } from '../models/developer';
+import { LubyconUser } from '../models/developer';
 import { createMattermostMention } from './mattermost';
-import { createSlackMention } from './slack';
 
-export async function fetchDevelopers(): Promise<Developer[]> {
-  const response = await fetch('https://assets.lubycon.io/data/developers.json');
-  return response.json();
+export async function fetchDevelopers(): Promise<LubyconUser[]> {
+  const response = await fetch('https://assets.lubycon.io/data/lubyconUsers-v2.json');
+  const lubyconUsers = (await response.json()) as LubyconUser[];
+  const developers = lubyconUsers.filter(user => user.role.includes('Engineer'));
+
+  return developers;
 }
 
-export function getDeveloperByGithubUser(developers: Developer[], githubUserName: string) {
+export function getDeveloperByGithubUser(developers: LubyconUser[], githubUserName: string) {
   return (
     developers.find(user => user.githubUserName === githubUserName) ?? {
       name: githubUserName,
       githubUserName: githubUserName,
-      slackUserId: githubUserName,
-      isExternalUser: true,
+      email: `${githubUserName}@dummy.io`,
+      role: '',
+      chapters: [],
+      teams: [],
     }
   );
 }
@@ -24,22 +28,21 @@ export function hasMentionInMessage(message: string) {
   return words.filter(word => word.includes('@')).length > 0;
 }
 
-async function replaceGithubUserInString(message: string, replacer: (developer: Developer) => string) {
+async function replaceGithubUserInString(message: string, replacer: (developer: LubyconUser) => string) {
   const words = message.split(/\s/);
   const developers = await fetchDevelopers();
 
   return words
     .map(message => {
       const githubUser = message.match(/@[a-z-_]+/)?.[0].replace('@', '');
-      const developer = getDeveloperByGithubUser(developers, githubUser ?? '');
-
-      return developer == null ? message : replacer(developer);
+      if (githubUser == null) {
+        return message;
+      } else {
+        const developer = getDeveloperByGithubUser(developers, githubUser ?? '');
+        return replacer(developer);
+      }
     })
     .join(' ');
-}
-
-export async function replaceGithubUserToSlackUserInString(message: string) {
-  return replaceGithubUserInString(message, createSlackMention);
 }
 
 export async function replaceGithubUserToMattermostUserInString(message: string) {
