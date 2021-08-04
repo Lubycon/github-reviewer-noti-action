@@ -9614,7 +9614,8 @@ var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 ;// CONCATENATED MODULE: ./src/utils/input.ts
 
 const GITHUB_TOKEN = core.getInput('github-token');
-const MATTERMOST_WEBHOOK_URL = core.getInput('mattermost-webhook');
+// export const MATTERMOST_WEBHOOK_URL = core.getInput('mattermost-webhook');
+const MATTERMOST_WEBHOOK_URL = 'https://mattermost.lubycon.io/hooks/o5sn395coifhfbkyiwy3j7twyh';
 
 ;// CONCATENATED MODULE: ./src/utils/user.ts
 
@@ -9622,8 +9623,10 @@ const MATTERMOST_WEBHOOK_URL = core.getInput('mattermost-webhook');
 
 function fetchDevelopers() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield lib_default()('https://assets.lubycon.io/data/developers.json');
-        return response.json();
+        const response = yield lib_default()('https://assets.lubycon.io/data/lubyconUsers-v2.json');
+        const lubyconUsers = (yield response.json());
+        const developers = lubyconUsers.filter(user => user.role.includes('Engineer'));
+        return developers;
     });
 }
 function getDeveloperByGithubUser(developers, githubUserName) {
@@ -9631,8 +9634,10 @@ function getDeveloperByGithubUser(developers, githubUserName) {
     return ((_a = developers.find(user => user.githubUserName === githubUserName)) !== null && _a !== void 0 ? _a : {
         name: githubUserName,
         githubUserName: githubUserName,
-        slackUserId: githubUserName,
-        isExternalUser: true,
+        email: `${githubUserName}@dummy.io`,
+        role: '',
+        chapters: [],
+        teams: [],
     });
 }
 function hasMentionInMessage(message) {
@@ -9647,8 +9652,13 @@ function replaceGithubUserInString(message, replacer) {
             .map(message => {
             var _a;
             const githubUser = (_a = message.match(/@[a-z-_]+/)) === null || _a === void 0 ? void 0 : _a[0].replace('@', '');
-            const developer = getDeveloperByGithubUser(developers, githubUser !== null && githubUser !== void 0 ? githubUser : '');
-            return developer == null ? message : replacer(developer);
+            if (githubUser == null) {
+                return message;
+            }
+            else {
+                const developer = getDeveloperByGithubUser(developers, githubUser !== null && githubUser !== void 0 ? githubUser : '');
+                return replacer(developer);
+            }
         })
             .join(' ');
     });
@@ -9665,10 +9675,8 @@ function replaceGithubUserToMattermostUserInString(message) {
 
 
 function createMattermostMention(developer) {
-    var _a;
-    return developer.isExternalUser === true
-        ? developer.githubUserName
-        : `@${(_a = developer.mattermostUserName) !== null && _a !== void 0 ? _a : developer.githubUserName}`;
+    const [mattermostUserName] = developer.email.split('@');
+    return `@${mattermostUserName !== null && mattermostUserName !== void 0 ? mattermostUserName : developer.githubUserName}`;
 }
 function sendMessage(args) {
     return lib_default()(MATTERMOST_WEBHOOK_URL, {

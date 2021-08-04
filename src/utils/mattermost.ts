@@ -1,14 +1,13 @@
 import fetch from 'node-fetch';
 import { MATTERMOST_WEBHOOK_URL } from './input';
-import { Developer } from 'models/developer';
+import { LubyconUser } from 'models/developer';
 import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from 'models/github';
 import { MattermostMessageAttachment, MattermostMessageParams } from 'models/mattermost';
 import { replaceGithubUserToMattermostUserInString } from '../utils/user';
 
-export function createMattermostMention(developer: Developer) {
-  return developer.isExternalUser === true
-    ? developer.githubUserName
-    : `@${developer.mattermostUserName ?? developer.githubUserName}`;
+export function createMattermostMention(developer: LubyconUser) {
+  const [mattermostUserName] = developer.email.split('@');
+  return `@${mattermostUserName ?? developer.githubUserName}`;
 }
 
 export function sendMessage(args: MattermostMessageParams) {

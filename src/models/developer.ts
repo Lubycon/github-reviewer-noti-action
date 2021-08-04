@@ -1,7 +1,8 @@
-export interface Developer {
+export interface LubyconUser {
   name: string;
   githubUserName: string;
-  slackUserId: string;
-  isExternalUser?: true;
-  mattermostUserName?: string;
+  email: string;
+  role: string;
+  chapters: string[];
+  teams: string[];
 }
