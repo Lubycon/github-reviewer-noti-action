@@ -1,7 +1,6 @@
 import fetch from 'node-fetch';
 import { Developer } from '../models/developer';
 import { createMattermostMention } from './mattermost';
-import { createSlackMention } from './slack';
 
 export async function fetchDevelopers(): Promise<Developer[]> {
   const response = await fetch('https://assets.lubycon.io/data/developers.json');
@@ -36,10 +35,6 @@ async function replaceGithubUserInString(message: string, replacer: (developer: 
       return developer == null ? message : replacer(developer);
     })
     .join(' ');
-}
-
-export async function replaceGithubUserToSlackUserInString(message: string) {
-  return replaceGithubUserInString(message, createSlackMention);
 }
 
 export async function replaceGithubUserToMattermostUserInString(message: string) {

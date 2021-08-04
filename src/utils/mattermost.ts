@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { MATTERMOST_HOST } from './input';
+import { MATTERMOST_WEBHOOK_URL } from './input';
 import { Developer } from 'models/developer';
 import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from 'models/github';
 import { MattermostMessageAttachment, MattermostMessageParams } from 'models/mattermost';
@@ -12,7 +12,7 @@ export function createMattermostMention(developer: Developer) {
 }
 
 export function sendMessage(args: MattermostMessageParams) {
-  return fetch(MATTERMOST_HOST, {
+  return fetch(MATTERMOST_WEBHOOK_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
