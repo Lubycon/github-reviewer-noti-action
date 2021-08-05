@@ -9614,8 +9614,7 @@ var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
 ;// CONCATENATED MODULE: ./src/utils/input.ts
 
 const GITHUB_TOKEN = core.getInput('github-token');
-// export const MATTERMOST_WEBHOOK_URL = core.getInput('mattermost-webhook');
-const MATTERMOST_WEBHOOK_URL = 'https://mattermost.lubycon.io/hooks/o5sn395coifhfbkyiwy3j7twyh';
+const MATTERMOST_WEBHOOK_URL = core.getInput('mattermost-webhook');
 
 ;// CONCATENATED MODULE: ./src/utils/user.ts
 
