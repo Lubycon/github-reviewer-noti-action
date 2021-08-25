@@ -1,9 +1,11 @@
-import fetch from 'node-fetch';
+import { MattermostClient } from '@lubycon/mattermost';
 import { MATTERMOST_WEBHOOK_URL } from './input';
 import { LubyconUser } from 'models/developer';
 import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from 'models/github';
 import { MattermostMessageAttachment, MattermostMessageParams } from 'models/mattermost';
 import { replaceGithubUserToMattermostUserInString } from '../utils/user';
+
+const mattermost = new MattermostClient();
 
 export function createMattermostMention(developer: LubyconUser) {
   const [mattermostUserName] = developer.email.split('@');
@@ -11,16 +13,10 @@ export function createMattermostMention(developer: LubyconUser) {
 }
 
 export function sendMessage(args: MattermostMessageParams) {
-  return fetch(MATTERMOST_WEBHOOK_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      username: 'PR 봇',
-      icon_url: 'https://assets.lubycon.io/logo/symbol-color.svg',
-      ...args,
-    }),
+  return mattermost.postMessageToIncomingWebhook(MATTERMOST_WEBHOOK_URL, {
+    username: 'PR 봇',
+    icon_url: 'https://assets.lubycon.io/logo/symbol-color.svg',
+    ...args,
   });
 }
 
