@@ -5,7 +5,7 @@ import { createMattermostMention } from './mattermost';
 export async function fetchDevelopers(): Promise<LubyconUser[]> {
   const response = await fetch('https://assets.lubycon.io/data/lubyconUsers-v2.json');
   const lubyconUsers = (await response.json()) as LubyconUser[];
-  const developers = lubyconUsers.filter(user => user.role.includes('Engineer'));
+  const developers = lubyconUsers.filter(user => user.role?.includes('Engineer'));
 
   return developers;
 }

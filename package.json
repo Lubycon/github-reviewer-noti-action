@@ -8,11 +8,10 @@
     "url": "git+https://github.com/Lubycon/github-reviewer-noti-action.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node ./index.ts",
     "release": "semantic-release",
     "build": "ncc build --source-map --license licenses.txt",
-    "test:mattermost": "ts-node ./test/mattermost.ts"
+    "test": "ts-node ./test/mattermost.ts"
   },
   "author": "",
   "license": "UNLICENSED",
