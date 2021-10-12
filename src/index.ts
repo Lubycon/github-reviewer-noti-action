@@ -32,12 +32,12 @@ async function main() {
 
   switch (githubEvent.type) {
     case GithubActionEventName.PR열림: {
-      core.info('Pull Request 오픈이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+      core.info('Pull Request 오픈이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
       await sendPullRequestReviewMattermostMessage(pullRequest);
       break;
     }
     case GithubActionEventName.PR머지승인: {
-      core.info('Pull Request 승인이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+      core.info('Pull Request 승인이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
       const review = await getPullRequestReview();
       await sendReviewApprovedMattermostMessage({ pullRequest, review });
       break;
@@ -46,7 +46,7 @@ async function main() {
       const comment = await getPullRequestComment();
 
       if (hasMentionInMessage(comment.message)) {
-        core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 슬랙 메세지를 보냅니다.');
+        core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
         await sendPullRequestCommentMattermostMessage({ pullRequest, comment });
       }
 
