@@ -6,7 +6,7 @@ import { getPullRequestOwner } from './pullRequests';
 
 export async function getCodeOwners() {
   const filePath = path.join(process.env.GITHUB_WORKSPACE ?? './', CODEOWNERS_PATH);
-  const pullRequestOwner = getPullRequestOwner();
+  const pullRequestOwner = await getPullRequestOwner();
   try {
     const contents = await readFile(filePath);
     const codeOwners = contents

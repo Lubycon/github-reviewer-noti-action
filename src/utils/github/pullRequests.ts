@@ -11,15 +11,15 @@ import {
 import { fetchDevelopers, getDeveloperByGithubUser } from 'utils/user';
 import { getCodeOwners, getRepositoryName } from './repositories';
 
-export function getPullRequestOwner() {
+export async function getPullRequestOwner() {
   const { pull_request } = github.context.payload;
-  const developers = fetchDevelopers();
+  const developers = await fetchDevelopers();
   const owner = pull_request?.user as RawGithubUser;
   return getDeveloperByGithubUser(developers, owner.login);
 }
 
 export async function getAssignedPullRequestReviewers() {
-  const developers = fetchDevelopers();
+  const developers = await fetchDevelopers();
   const { pull_request } = github.context.payload;
   const codeOwners = await getCodeOwners();
   const prReviewers: RawGithubUser[] = pull_request?.requested_reviewers;
@@ -40,7 +40,7 @@ export function getRawPullRequestComment() {
 }
 
 export async function getDeveloperFromGithubUser(user: RawGithubUser) {
-  const developers = fetchDevelopers();
+  const developers = await fetchDevelopers();
   const rawGithubUserName = user.login;
   return getDeveloperByGithubUser(developers, rawGithubUserName);
 }
@@ -48,7 +48,7 @@ export async function getDeveloperFromGithubUser(user: RawGithubUser) {
 export async function getPullRequest(): Promise<GithubPullRequest> {
   const { pull_request } = github.context.payload;
   const reviewers = await getAssignedPullRequestReviewers();
-  const owner = getPullRequestOwner();
+  const owner = await getPullRequestOwner();
   const repository = getRepositoryName() ?? '';
 
   return {
