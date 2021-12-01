@@ -1,4 +1,4 @@
-import { LubyconUser } from './developer';
+import { User } from './developer';
 
 export interface RawGithubUser {
   avatar_url: string;
@@ -43,13 +43,13 @@ export interface GithubPullRequest {
   title: string;
   body: string;
   link: string;
-  reviewers: LubyconUser[];
-  owner: LubyconUser;
+  reviewers: User[];
+  owner: User;
   repository: string;
 }
 
 export interface GithubPullRequestComment {
-  author: LubyconUser;
+  author: User;
   message: string;
 }
 

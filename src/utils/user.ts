@@ -1,25 +1,22 @@
 import fetch from 'node-fetch';
-import { LubyconUser } from '../models/developer';
-import { createMattermostMention } from './mattermost';
+import { User } from '../models/developer';
+import { createSlackMention } from './slack';
 
-export async function fetchDevelopers(): Promise<LubyconUser[]> {
+export async function fetchDevelopers() {
   const response = await fetch('https://assets.lubycon.io/data/lubyconUsers-v2.json');
-  const lubyconUsers = (await response.json()) as LubyconUser[];
-  const developers = lubyconUsers.filter(user => user.role?.includes('Engineer'));
+  const lubyconUsers = (await response.json()) as User[];
 
-  return developers;
+  return lubyconUsers;
 }
 
-export function getDeveloperByGithubUser(developers: LubyconUser[], githubUserName: string) {
+export function getDeveloperByGithubUser(developers: User[], githubUserName: string) {
   return (
-    developers.find(user => user.githubUserName === githubUserName) ?? {
-      name: githubUserName,
+    developers.find(user => user.githubUserName === githubUserName) ??
+    ({
       githubUserName: githubUserName,
       email: `${githubUserName}@dummy.io`,
-      role: '',
-      chapters: [],
-      teams: [],
-    }
+      slackUserId: githubUserName,
+    } as User)
   );
 }
 
@@ -28,7 +25,7 @@ export function hasMentionInMessage(message: string) {
   return words.filter(word => word.includes('@')).length > 0;
 }
 
-async function replaceGithubUserInString(message: string, replacer: (developer: LubyconUser) => string) {
+async function replaceGithubUserInString(message: string, replacer: (developer: User) => string) {
   const words = message.split(/\s/);
   const developers = await fetchDevelopers();
 
@@ -45,6 +42,6 @@ async function replaceGithubUserInString(message: string, replacer: (developer: 
     .join(' ');
 }
 
-export async function replaceGithubUserToMattermostUserInString(message: string) {
-  return replaceGithubUserInString(message, createMattermostMention);
+export async function replaceGithubUserToSlackUserInString(message: string) {
+  return replaceGithubUserInString(message, createSlackMention);
 }

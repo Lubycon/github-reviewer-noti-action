@@ -1,8 +1,5 @@
-export interface LubyconUser {
-  name: string;
-  githubUserName: string;
+export interface User {
   email: string;
-  role: string | null;
-  chapters: string[];
-  teams: string[];
+  githubUserName: string;
+  slackUserId: string;
 }

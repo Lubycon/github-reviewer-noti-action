@@ -1,5 +1,5 @@
 name: Test Run
-on: [pull_request, pull_request_review, pull_request_review_comment]
+on: [push]
 
 jobs:
   build:
@@ -31,4 +31,5 @@ jobs:
         id: pr-reviewer-notify
         with:
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
-          mattermost-webhook: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          slack-bot-token: ${{ secrets.LUBYCON_SLACK_BOT_TOKEN }}
+          slack-channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}

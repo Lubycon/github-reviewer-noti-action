@@ -11,7 +11,7 @@
     "dev": "ts-node ./index.ts",
     "release": "semantic-release",
     "build": "ncc build --source-map --license licenses.txt",
-    "test": "ts-node ./test/mattermost.ts"
+    "test": "ts-node ./test/slack.ts"
   },
   "author": "",
   "license": "UNLICENSED",
@@ -19,6 +19,7 @@
     "@actions/core": "^1.2.7",
     "@actions/github": "^4.0.0",
     "@lubycon/mattermost": "^1.1.14",
+    "@slack/web-api": "^6.5.1",
     "@vercel/ncc": "^0.28.3",
     "node-fetch": "^2.6.1",
     "ts-node": "^9.1.1",

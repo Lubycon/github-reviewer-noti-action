@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { LubyconUser } from 'models/developer';
+import { User } from 'models/developer';
 import {
   RawGithubUser,
   RawGithubPullRequestReview,
@@ -28,7 +28,7 @@ export async function getAssignedPullRequestReviewers() {
 
   return reviewers
     .map(user => getDeveloperByGithubUser(developers, user))
-    .filter<LubyconUser>((user): user is LubyconUser => user != null);
+    .filter<User>((user): user is User => user != null);
 }
 
 export function getRawPullReuqestReview() {
