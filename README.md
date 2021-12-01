@@ -20,13 +20,14 @@ jobs:
         uses: Lubycon/github-reviewer-noti-action@v2.0.0
         with:
           github-token: ${{ secrets.LUBYCON_GITHUB_TOKEN }}
-          mattermost-webhook: ${{ secrets.MATTERMOST_WEBHOOK_URL }}
+          slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
 ```
 
 ## Configuration
 
-| 이름              | 설명                                                                                               |
-| ----------------- | -------------------------------------------------------------------------------------------------- |
-| `github-token`    | Github Personal Access Token. `repo` 스코프를 지정해서 생성해주세요                                |
-| `slack-bot-token` | 메세지를 보낼 슬랙봇 토큰. 루비콘 멤버라면 루비콘의 Org Secrets에 저장된 토큰을 사용할 수 있습니다 |
-| `channel-id`      | 노티를 쏘고 싶은 슬랙 채널 ID                                                                      |
+| 이름               | 설명                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| `github-token`     | Github Personal Access Token. `repo` 스코프를 지정해서 생성해주세요                                |
+| `slack-bot-token`  | 메세지를 보낼 슬랙봇 토큰. 루비콘 멤버라면 루비콘의 Org Secrets에 저장된 토큰을 사용할 수 있습니다 |
+| `slack-channel-id` | 노티를 쏘고 싶은 슬랙 채널 ID                                                                      |
