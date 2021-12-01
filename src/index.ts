@@ -1,15 +1,15 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import { SUPPROTED_EVENTS } from 'constants/github';
-import {
-  sendPullRequestReviewMattermostMessage,
-  sendReviewApprovedMattermostMessage,
-  sendPullRequestCommentMattermostMessage,
-} from 'utils/mattermost';
 import { getPullRequest, getPullRequestComment, getPullRequestReview } from 'utils/github/pullRequests';
 import { parseGithubEvent } from 'utils/github/events';
 import { GithubActionEventName } from 'models/github';
 import { hasMentionInMessage } from 'utils/user';
+import {
+  sendPullRequestCommentSlackMessage,
+  sendPullRequestReviewSlackMessage,
+  sendReviewApprovedSlackMessage,
+} from 'utils/slack';
 
 const { eventName, payload } = github.context;
 
@@ -33,13 +33,13 @@ async function main() {
   switch (githubEvent.type) {
     case GithubActionEventName.PR열림: {
       core.info('Pull Request 오픈이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
-      await sendPullRequestReviewMattermostMessage(pullRequest);
+      await sendPullRequestReviewSlackMessage(pullRequest);
       break;
     }
     case GithubActionEventName.PR머지승인: {
       core.info('Pull Request 승인이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
       const review = await getPullRequestReview();
-      await sendReviewApprovedMattermostMessage({ pullRequest, review });
+      await sendReviewApprovedSlackMessage({ pullRequest, review });
       break;
     }
     case GithubActionEventName.PR리뷰코멘트: {
@@ -47,7 +47,7 @@ async function main() {
 
       if (hasMentionInMessage(comment.message)) {
         core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
-        await sendPullRequestCommentMattermostMessage({ pullRequest, comment });
+        await sendPullRequestCommentSlackMessage({ pullRequest, comment });
       }
 
       break;
@@ -59,6 +59,6 @@ async function main() {
 
 try {
   main();
-} catch (e) {
+} catch (e: any) {
   core.setFailed(e);
 }
