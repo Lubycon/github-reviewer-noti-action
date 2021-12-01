@@ -8,7 +8,7 @@ import {
 const Evan: User = {
   githubUserName: 'evan-moon',
   email: 'bboydart91@gmail.com',
-  slackUserId: '',
+  slackUserId: 'U02P1TCRH3N',
 };
 
 const main = async () => {
@@ -50,7 +50,6 @@ const main = async () => {
         message: '@evan-moon @unknown-github-user 꼭 이렇게 짜셔야 했나요?',
       },
     });
-    console.log('Finished');
   } catch (e) {
     throw e;
   }

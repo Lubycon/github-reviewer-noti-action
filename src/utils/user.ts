@@ -1,12 +1,9 @@
-import fetch from 'node-fetch';
 import { User } from '../models/developer';
 import { createSlackMention } from './slack';
+import users from '../../developers.json';
 
-export async function fetchDevelopers() {
-  const response = await fetch('https://assets.lubycon.io/data/lubyconUsers-v2.json');
-  const lubyconUsers = (await response.json()) as User[];
-
-  return lubyconUsers;
+export function fetchDevelopers() {
+  return users;
 }
 
 export function getDeveloperByGithubUser(developers: User[], githubUserName: string) {
@@ -27,7 +24,7 @@ export function hasMentionInMessage(message: string) {
 
 async function replaceGithubUserInString(message: string, replacer: (developer: User) => string) {
   const words = message.split(/\s/);
-  const developers = await fetchDevelopers();
+  const developers = fetchDevelopers();
 
   return words
     .map(message => {
