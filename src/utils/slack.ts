@@ -1,17 +1,21 @@
-import { ChatPostMessageArguments, WebClient } from '@slack/web-api';
-import { SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
+import { ChatPostMessageArguments } from '@slack/web-api';
+import { App } from '@slack/bolt';
+import { SLACK_BOT_SIGNING_SECRET, SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
 import { User } from '../models/developer';
 import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from '../models/github';
 import { replaceGithubUserToSlackUserInString } from './user';
 
-const slackClient = new WebClient(SLACK_BOT_TOKEN);
+const slackClient = new App({
+  token: SLACK_BOT_TOKEN,
+  signingSecret: SLACK_BOT_SIGNING_SECRET,
+});
 
 export function createSlackMention(developer: User) {
   return developer.email.includes('@dummy.io') ? `@${developer.githubUserName}` : `<@${developer.slackUserId}>`;
 }
 
 export function sendMessage(args: ChatPostMessageArguments) {
-  return slackClient.chat.postMessage(args);
+  return slackClient.client.chat.postMessage(args);
 }
 
 export function sendReviewApprovedSlackMessage({

@@ -16,9 +16,9 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
-    "@actions/core": "^1.2.7",
-    "@actions/github": "^4.0.0",
-    "@lubycon/mattermost": "^1.1.14",
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "@slack/bolt": "^3.8.1",
     "@slack/web-api": "^6.5.1",
     "@vercel/ncc": "^0.28.3",
     "node-fetch": "^2.6.1",

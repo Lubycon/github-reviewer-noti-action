@@ -13,6 +13,9 @@ inputs:
   slack-channel-id:
     description: 'ID of the channel or conversation in Slack you would like messages posted to.'
     required: true
+  slack-bot-signing-secret:
+    description: 'Slack Bot Signing Secret'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
