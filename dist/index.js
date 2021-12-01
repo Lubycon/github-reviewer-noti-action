@@ -18358,12 +18358,15 @@ function parseGithubEvent() {
 
 
 
+
 const { eventName, payload } = github.context;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         core.info('🔥 Run.....');
         core.info(`eventName = ${eventName}`);
         core.info(`action = ${payload.action}`);
+        core.info(`token = ${SLACK_BOT_TOKEN}`);
+        core.info(`target channel id = ${TARGET_SLACK_CHANNEL_ID}`);
         if (!SUPPROTED_EVENTS.includes(eventName)) {
             core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
             return;
@@ -18375,12 +18378,12 @@ function main() {
         }
         switch (githubEvent.type) {
             case GithubActionEventName["PR열림"]: {
-                core.info('Pull Request 오픈이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
+                core.info('Pull Request 오픈이 감지되었습니다. 메세지를 보냅니다.');
                 yield sendPullRequestReviewSlackMessage(pullRequest);
                 break;
             }
             case GithubActionEventName["PR머지승인"]: {
-                core.info('Pull Request 승인이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
+                core.info('Pull Request 승인이 감지되었습니다. 메세지를 보냅니다.');
                 const review = yield getPullRequestReview();
                 yield sendReviewApprovedSlackMessage({ pullRequest, review });
                 break;
@@ -18388,7 +18391,7 @@ function main() {
             case GithubActionEventName["PR리뷰코멘트"]: {
                 const comment = yield getPullRequestComment();
                 if (hasMentionInMessage(comment.message)) {
-                    core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메터모스트 메세지를 보냅니다.');
+                    core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메세지를 보냅니다.');
                     yield sendPullRequestCommentSlackMessage({ pullRequest, comment });
                 }
                 break;
