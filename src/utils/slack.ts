@@ -1,10 +1,12 @@
-import { ChatPostMessageArguments, WebClient } from '@slack/web-api';
+import { ChatPostMessageArguments, LogLevel, WebClient } from '@slack/web-api';
 import { SLACK_BOT_TOKEN, TARGET_SLACK_CHANNEL_ID } from './input';
 import { User } from '../models/developer';
 import { GithubPullRequest, GithubPullRequestComment, GithubPullRequestReview } from '../models/github';
 import { replaceGithubUserToSlackUserInString } from './user';
 
-const slackClient = new WebClient(SLACK_BOT_TOKEN);
+const slackClient = new WebClient(SLACK_BOT_TOKEN, {
+  logLevel: LogLevel.DEBUG,
+});
 
 export function createSlackMention(developer: User) {
   return developer.email.includes('@dummy.io') ? `@${developer.githubUserName}` : `<@${developer.slackUserId}>`;
