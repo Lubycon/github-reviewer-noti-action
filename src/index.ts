@@ -18,8 +18,8 @@ async function main() {
   core.info('🔥 Run.....');
   core.info(`eventName = ${eventName}`);
   core.info(`action = ${payload.action}`);
-  core.info(`token = ${SLACK_BOT_TOKEN}`);
-  core.info(`target channel id = ${TARGET_SLACK_CHANNEL_ID}`);
+  core.info(`token = ${JSON.stringify(SLACK_BOT_TOKEN)}`);
+  core.info(`target channel id = ${JSON.stringify(TARGET_SLACK_CHANNEL_ID)}`);
 
   if (!SUPPROTED_EVENTS.includes(eventName)) {
     core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
