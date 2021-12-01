@@ -1,5 +1,5 @@
 import * as github from '@actions/github';
-import { LubyconUser } from 'models/developer';
+import { User } from 'models/developer';
 import {
   RawGithubUser,
   RawGithubPullRequestReview,
@@ -11,15 +11,15 @@ import {
 import { fetchDevelopers, getDeveloperByGithubUser } from 'utils/user';
 import { getCodeOwners, getRepositoryName } from './repositories';
 
-export async function getPullRequestOwner() {
+export function getPullRequestOwner() {
   const { pull_request } = github.context.payload;
-  const developers = await fetchDevelopers();
+  const developers = fetchDevelopers();
   const owner = pull_request?.user as RawGithubUser;
   return getDeveloperByGithubUser(developers, owner.login);
 }
 
 export async function getAssignedPullRequestReviewers() {
-  const developers = await fetchDevelopers();
+  const developers = fetchDevelopers();
   const { pull_request } = github.context.payload;
   const codeOwners = await getCodeOwners();
   const prReviewers: RawGithubUser[] = pull_request?.requested_reviewers;
@@ -28,7 +28,7 @@ export async function getAssignedPullRequestReviewers() {
 
   return reviewers
     .map(user => getDeveloperByGithubUser(developers, user))
-    .filter<LubyconUser>((user): user is LubyconUser => user != null);
+    .filter<User>((user): user is User => user != null);
 }
 
 export function getRawPullReuqestReview() {
@@ -40,7 +40,7 @@ export function getRawPullRequestComment() {
 }
 
 export async function getDeveloperFromGithubUser(user: RawGithubUser) {
-  const developers = await fetchDevelopers();
+  const developers = fetchDevelopers();
   const rawGithubUserName = user.login;
   return getDeveloperByGithubUser(developers, rawGithubUserName);
 }
@@ -48,7 +48,7 @@ export async function getDeveloperFromGithubUser(user: RawGithubUser) {
 export async function getPullRequest(): Promise<GithubPullRequest> {
   const { pull_request } = github.context.payload;
   const reviewers = await getAssignedPullRequestReviewers();
-  const owner = await getPullRequestOwner();
+  const owner = getPullRequestOwner();
   const repository = getRepositoryName() ?? '';
 
   return {

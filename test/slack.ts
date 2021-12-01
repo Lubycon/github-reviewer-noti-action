@@ -1,21 +1,19 @@
+import { User } from 'models/developer';
 import {
-  sendPullRequestCommentMattermostMessage,
-  sendPullRequestReviewMattermostMessage,
-  sendReviewApprovedMattermostMessage,
-} from '../src/utils/mattermost';
+  sendPullRequestCommentSlackMessage,
+  sendPullRequestReviewSlackMessage,
+  sendReviewApprovedSlackMessage,
+} from '../src/utils/slack';
 
-const Evan = {
-  name: '문동욱',
+const Evan: User = {
   githubUserName: 'evan-moon',
   email: 'bboydart91@gmail.com',
-  role: 'Frontend Engineer',
-  chapters: ['Frontend'],
-  teams: ['Lubycon'],
+  slackUserId: 'U02P1TCRH3N',
 };
 
 const main = async () => {
   try {
-    await sendPullRequestReviewMattermostMessage({
+    await sendPullRequestReviewSlackMessage({
       title: '테스트 PR입니다',
       body: '테스트테스트',
       link: 'https://lubycon.io',
@@ -23,7 +21,7 @@ const main = async () => {
       owner: Evan,
       repository: 'test-repository',
     });
-    await sendReviewApprovedMattermostMessage({
+    await sendReviewApprovedSlackMessage({
       pullRequest: {
         title: '테스트 PR입니다',
         body: '테스트테스트',
@@ -38,7 +36,7 @@ const main = async () => {
         message: 'LGTM입니다~',
       },
     });
-    await sendPullRequestCommentMattermostMessage({
+    await sendPullRequestCommentSlackMessage({
       pullRequest: {
         title: '테스트 PR입니다. 코멘트 테스트',
         body: '테스트테스트',
@@ -52,7 +50,6 @@ const main = async () => {
         message: '@evan-moon @unknown-github-user 꼭 이렇게 짜셔야 했나요?',
       },
     });
-    console.log('Finished');
   } catch (e) {
     throw e;
   }
