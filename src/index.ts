@@ -10,7 +10,7 @@ import {
   sendPullRequestReviewSlackMessage,
   sendReviewApprovedSlackMessage,
 } from 'utils/slack';
-import { SLACK_BOT_TOKEN, USER_INFO_URL } from 'utils/input';
+import { SLACK_BOT_TOKEN } from 'utils/input';
 
 const { eventName, payload } = github.context;
 
@@ -25,10 +25,11 @@ async function main() {
     return;
   }
 
-  core.info(`USER_INFO_URL = ${USER_INFO_URL}`);
-
+  core.info(`DEBUG1`);
   const pullRequest = await getPullRequest();
+  core.info(`DEBUG2`);
   const githubEvent = parseGithubEvent();
+  core.info(`DEBUG3`);
 
   if (githubEvent == null) {
     return;
@@ -36,6 +37,7 @@ async function main() {
 
   switch (githubEvent.type) {
     case GithubActionEventName.PR열림: {
+      core.info(`DEBUG4`);
       core.info('Pull Request 오픈이 감지되었습니다. 메세지를 보냅니다.');
       await sendPullRequestReviewSlackMessage(pullRequest);
       break;
