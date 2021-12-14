@@ -16,6 +16,10 @@ inputs:
   slack-bot-signing-secret:
     description: 'Slack Bot Signing Secret'
     required: true
+  user-info-url:
+    description: 'Reviewer information.'
+    required: true
+
 runs:
   using: 'node12'
   main: 'dist/index.js'

@@ -1,9 +1,10 @@
 import { User } from '../models/developer';
 import { createSlackMention } from './slack';
 import fetch from 'node-fetch';
+import { USER_INFO_URL } from './input';
 
 export async function fetchDevelopers() {
-  const response = await fetch('https://raw.githubusercontent.com/Lubycon/lubycon-users/main/users.json');
+  const response = await fetch(USER_INFO_URL);
   return (await response.json()) as User[];
 }
 
