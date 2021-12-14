@@ -15,7 +15,7 @@ import { SLACK_BOT_TOKEN } from 'utils/input';
 const { eventName, payload } = github.context;
 
 async function main() {
-  core.info('🔥 Run.....');
+  core.info('🔥 Run...');
   core.info(`eventName = ${eventName}`);
   core.info(`action = ${payload.action}`);
   core.info(`token = ${SLACK_BOT_TOKEN.length}`);
