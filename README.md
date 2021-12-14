@@ -38,7 +38,7 @@ jobs:
         with:
           slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
-          user-info-url: my-json-url
+          user-info-url: ${{ secrets.USER_JSON_URL }}
 ```
 
 ## Configuration
