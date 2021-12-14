@@ -62956,491 +62956,6 @@ function socketOnError() {
 
 /***/ }),
 
-/***/ 39532:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-"use strict";
-// ESM COMPAT FLAG
-__nccwpck_require__.r(__webpack_exports__);
-
-// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
-var tslib = __nccwpck_require__(4351);
-;// CONCATENATED MODULE: ./node_modules/tslib/modules/index.js
-
-const {
-    __extends,
-    __assign,
-    __rest,
-    __decorate,
-    __param,
-    __metadata,
-    __awaiter,
-    __generator,
-    __exportStar,
-    __createBinding,
-    __values,
-    __read,
-    __spread,
-    __spreadArrays,
-    __await,
-    __asyncGenerator,
-    __asyncDelegator,
-    __asyncValues,
-    __makeTemplateObject,
-    __importStar,
-    __importDefault,
-    __classPrivateFieldGet,
-    __classPrivateFieldSet,
-} = tslib;
-
-
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(42186);
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(95438);
-;// CONCATENATED MODULE: ./src/constants/github.ts
-const CODEOWNERS_PATH = './.github/CODEOWNERS';
-const SUPPROTED_EVENTS = ['pull_request', 'pull_request_review', 'pull_request_review_comment'];
-
-// EXTERNAL MODULE: ./node_modules/@slack/bolt/dist/index.js
-var dist = __nccwpck_require__(23311);
-;// CONCATENATED MODULE: ./src/utils/input.ts
-
-const SLACK_BOT_TOKEN = core.getInput('slack-bot-token', { required: true });
-const TARGET_SLACK_CHANNEL_ID = core.getInput('slack-channel-id', { required: true });
-const SLACK_BOT_SIGNING_SECRET = core.getInput('slack-bot-signing-secret', { required: true });
-
-;// CONCATENATED MODULE: ./src/utils/slack.ts
-
-
-
-
-const slackClient = new dist.App({
-    token: SLACK_BOT_TOKEN,
-    signingSecret: SLACK_BOT_SIGNING_SECRET,
-});
-function createSlackMention(developer) {
-    return developer.email.includes('@dummy.io') ? `@${developer.githubUserName}` : `<@${developer.slackUserId}>`;
-}
-function sendMessage(args) {
-    return slackClient.client.chat.postMessage(args);
-}
-function sendReviewApprovedSlackMessage({ pullRequest: { repository, link, title, owner }, review: { author }, }) {
-    const blocks = [
-        {
-            type: 'header',
-            text: {
-                type: 'plain_text',
-                text: 'Pull Request가 승인되었어요! :white_check_mark:',
-            },
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `*${repository}* < <${link}|${title}>`,
-            },
-        },
-        {
-            type: 'divider',
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `${createSlackMention(author)}님이 ${createSlackMention(owner)}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
-            },
-        },
-        {
-            type: 'actions',
-            elements: [
-                {
-                    type: 'button',
-                    text: {
-                        type: 'plain_text',
-                        text: '머지하러가기 :partymerge:',
-                        emoji: true,
-                    },
-                    style: 'primary',
-                    url: link,
-                },
-            ],
-        },
-    ];
-    return sendMessage({
-        channel: TARGET_SLACK_CHANNEL_ID,
-        text: '',
-        blocks,
-    });
-}
-function sendPullRequestReviewSlackMessage({ reviewers, repository, owner, link, title }) {
-    const reviewerNames = reviewers
-        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
-        .filter(v => v != null)
-        .join(',');
-    const blocks = [
-        {
-            type: 'header',
-            text: {
-                type: 'plain_text',
-                text: '새로운 Pull Request가 오픈되었어요 :eyes:',
-            },
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `*${repository}* > <${link}|${title}>`,
-            },
-        },
-        {
-            type: 'divider',
-        },
-        {
-            type: 'section',
-            text: {
-                type: 'mrkdwn',
-                text: `${createSlackMention(owner)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
-            },
-        },
-        {
-            type: 'actions',
-            elements: [
-                {
-                    type: 'button',
-                    text: {
-                        type: 'plain_text',
-                        text: '지금 리뷰하기 :fire:',
-                        emoji: true,
-                    },
-                    style: 'primary',
-                    url: link,
-                },
-            ],
-        },
-    ];
-    return sendMessage({
-        channel: TARGET_SLACK_CHANNEL_ID,
-        text: '',
-        blocks,
-    });
-}
-function sendPullRequestCommentSlackMessage({ pullRequest: { repository, link, title }, comment, }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const blocks = [
-            {
-                type: 'header',
-                text: {
-                    type: 'plain_text',
-                    text: 'Pull Request에 새로운 댓글이 달렸어요',
-                },
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: `*${repository}* > <${link}|${title}>`,
-                },
-            },
-            {
-                type: 'divider',
-            },
-            {
-                type: 'section',
-                text: {
-                    type: 'mrkdwn',
-                    text: yield replaceGithubUserToSlackUserInString(comment.message),
-                },
-            },
-        ];
-        return sendMessage({
-            channel: TARGET_SLACK_CHANNEL_ID,
-            text: '',
-            blocks,
-        });
-    });
-}
-
-;// CONCATENATED MODULE: ./developers.json
-const developers_namespaceObject = JSON.parse('[{"email":"bboydart91@gmail.com","githubUserName":"evan-moon","slackUserId":"U02P1TCRH3N"},{"email":"93kimhyunjun@gmail.com","githubUserName":"Junkim93","slackUserId":"U02P185665R"},{"email":"somony9292@gmail.com","githubUserName":"s-ong-c","slackUserId":"U02NZN0V5NW"},{"email":"somony9292@gmail.com","githubUserName":"s-ong-c","slackUserId":"U02NZN0V5NW"},{"email":"ssong758@gmail.com","githubUserName":"ssMinji","slackUserId":"U02PPKDU77S"},{"email":"appdler96@gmail.com","githubUserName":"pa-rang","slackUserId":"U02NLAR38BZ"},{"email":"doscmdev@gmail.com","githubUserName":"zi-gae","slackUserId":"U02P0214VJP"},{"email":"hyein.ju92@gmail.com","githubUserName":"theJunimo","slackUserId":"U02P10HAPRQ"}]');
-;// CONCATENATED MODULE: ./src/utils/user.ts
-
-
-
-function fetchDevelopers() {
-    return developers_namespaceObject;
-}
-function getDeveloperByGithubUser(developers, githubUserName) {
-    var _a;
-    return ((_a = developers.find(user => user.githubUserName === githubUserName)) !== null && _a !== void 0 ? _a : {
-        githubUserName: githubUserName,
-        email: `${githubUserName}@dummy.io`,
-        slackUserId: githubUserName,
-    });
-}
-function hasMentionInMessage(message) {
-    const words = message.split(/\s/);
-    return words.filter(word => word.includes('@')).length > 0;
-}
-function replaceGithubUserInString(message, replacer) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const words = message.split(/\s/);
-        const developers = fetchDevelopers();
-        return words
-            .map(message => {
-            var _a;
-            const githubUser = (_a = message.match(/@[a-z-_]+/)) === null || _a === void 0 ? void 0 : _a[0].replace('@', '');
-            if (githubUser == null) {
-                return message;
-            }
-            else {
-                const developer = getDeveloperByGithubUser(developers, githubUser !== null && githubUser !== void 0 ? githubUser : '');
-                return replacer(developer);
-            }
-        })
-            .join(' ');
-    });
-}
-function replaceGithubUserToSlackUserInString(message) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return replaceGithubUserInString(message, createSlackMention);
-    });
-}
-
-// EXTERNAL MODULE: external "fs"
-var external_fs_ = __nccwpck_require__(35747);
-var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
-;// CONCATENATED MODULE: ./src/utils/file.ts
-
-
-function readFile(file) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise((resolve, reject) => {
-            external_fs_default().readFile(file, { encoding: 'utf-8' }, (err, data) => {
-                if (err)
-                    reject(err);
-                resolve(data);
-            });
-        });
-    });
-}
-
-// EXTERNAL MODULE: external "path"
-var external_path_ = __nccwpck_require__(85622);
-var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
-;// CONCATENATED MODULE: ./src/utils/github/repositories.ts
-
-
-
-
-
-
-function getCodeOwners() {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        const filePath = external_path_default().join((_a = process.env.GITHUB_WORKSPACE) !== null && _a !== void 0 ? _a : './', CODEOWNERS_PATH);
-        const pullRequestOwner = getPullRequestOwner();
-        try {
-            const contents = yield readFile(filePath);
-            const codeOwners = contents
-                .replace(/\*\s/, '')
-                .split(/\s/)
-                .map(member => member.replace('@', ''))
-                .filter(owner => owner !== pullRequestOwner.githubUserName);
-            return codeOwners;
-        }
-        catch (_b) {
-            return [];
-        }
-    });
-}
-function getRepositoryName() {
-    const { repository } = github.context.payload;
-    return repository === null || repository === void 0 ? void 0 : repository.name;
-}
-
-;// CONCATENATED MODULE: ./src/utils/github/pullRequests.ts
-
-
-
-
-function getPullRequestOwner() {
-    const { pull_request } = github.context.payload;
-    const developers = fetchDevelopers();
-    const owner = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user;
-    return getDeveloperByGithubUser(developers, owner.login);
-}
-function getAssignedPullRequestReviewers() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const developers = fetchDevelopers();
-        const { pull_request } = github.context.payload;
-        const codeOwners = yield getCodeOwners();
-        const prReviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
-        const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
-        return reviewers
-            .map(user => getDeveloperByGithubUser(developers, user))
-            .filter((user) => user != null);
-    });
-}
-function getRawPullReuqestReview() {
-    return github.context.payload.review;
-}
-function getRawPullRequestComment() {
-    return github.context.payload.comment;
-}
-function getDeveloperFromGithubUser(user) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const developers = fetchDevelopers();
-        const rawGithubUserName = user.login;
-        return getDeveloperByGithubUser(developers, rawGithubUserName);
-    });
-}
-function getPullRequest() {
-    var _a, _b, _c, _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        const { pull_request } = github.context.payload;
-        const reviewers = yield getAssignedPullRequestReviewers();
-        const owner = getPullRequestOwner();
-        const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
-        return {
-            title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
-            body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
-            link: ((_d = pull_request === null || pull_request === void 0 ? void 0 : pull_request._links.html.href) !== null && _d !== void 0 ? _d : ''),
-            reviewers,
-            owner,
-            repository,
-        };
-    });
-}
-function getPullRequestComment() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const comment = getRawPullRequestComment();
-        const author = yield getDeveloperFromGithubUser(comment.user);
-        return {
-            author,
-            message: comment.body,
-        };
-    });
-}
-function getPullRequestReview() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const review = getRawPullReuqestReview();
-        const author = yield getDeveloperFromGithubUser(review.user);
-        return {
-            author,
-            message: review.body,
-            state: review.state,
-        };
-    });
-}
-
-;// CONCATENATED MODULE: ./src/models/github.ts
-var GithubActionEventName;
-(function (GithubActionEventName) {
-    GithubActionEventName["PR\uC5F4\uB9BC"] = "CREATED_PULL_REQUEST";
-    GithubActionEventName["PR\uBA38\uC9C0\uC2B9\uC778"] = "APPROVED_PULL_REQUEST";
-    GithubActionEventName["PR\uB9AC\uBDF0\uCF54\uBA58\uD2B8"] = "COMMENTED_PULL_REQUEST";
-})(GithubActionEventName || (GithubActionEventName = {}));
-
-;// CONCATENATED MODULE: ./src/utils/github/events.ts
-
-
-function isReadyCodeReview() {
-    const { eventName, payload } = github.context;
-    const isPullReqeustEvent = eventName === 'pull_request';
-    const isReadyForReview = payload.action === 'opened' || payload.action === 'reopened' || payload.action === 'ready_for_review';
-    return isPullReqeustEvent && isReadyForReview;
-}
-function isApprovedCodeReview() {
-    const { eventName, payload } = github.context;
-    const isReviewEvent = eventName === 'pull_request_review';
-    return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
-}
-function isCreatedPullRequestComment() {
-    const { eventName, payload } = github.context;
-    const isPullRequestCommentEvent = eventName === 'pull_request_review_comment';
-    return isPullRequestCommentEvent && payload.action === 'created';
-}
-function parseGithubEvent() {
-    if (isReadyCodeReview()) {
-        return {
-            type: GithubActionEventName["PR열림"],
-        };
-    }
-    else if (isApprovedCodeReview()) {
-        return {
-            type: GithubActionEventName["PR머지승인"],
-        };
-    }
-    else if (isCreatedPullRequestComment()) {
-        return {
-            type: GithubActionEventName["PR리뷰코멘트"],
-        };
-    }
-    return null;
-}
-
-;// CONCATENATED MODULE: ./src/index.ts
-
-
-
-
-
-
-
-
-
-
-const { eventName, payload } = github.context;
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info('🔥 Run.....');
-        core.info(`eventName = ${eventName}`);
-        core.info(`action = ${payload.action}`);
-        core.info(`token = ${SLACK_BOT_TOKEN.length}`);
-        if (!SUPPROTED_EVENTS.includes(eventName)) {
-            core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
-            return;
-        }
-        const pullRequest = yield getPullRequest();
-        const githubEvent = parseGithubEvent();
-        if (githubEvent == null) {
-            return;
-        }
-        switch (githubEvent.type) {
-            case GithubActionEventName["PR열림"]: {
-                core.info('Pull Request 오픈이 감지되었습니다. 메세지를 보냅니다.');
-                yield sendPullRequestReviewSlackMessage(pullRequest);
-                break;
-            }
-            case GithubActionEventName["PR머지승인"]: {
-                core.info('Pull Request 승인이 감지되었습니다. 메세지를 보냅니다.');
-                const review = yield getPullRequestReview();
-                yield sendReviewApprovedSlackMessage({ pullRequest, review });
-                break;
-            }
-            case GithubActionEventName["PR리뷰코멘트"]: {
-                const comment = yield getPullRequestComment();
-                if (hasMentionInMessage(comment.message)) {
-                    core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메세지를 보냅니다.');
-                    yield sendPullRequestCommentSlackMessage({ pullRequest, comment });
-                }
-                break;
-            }
-        }
-        core.info('👋 Done');
-    });
-}
-try {
-    main();
-}
-catch (e) {
-    core.setFailed(e);
-}
-
-
-/***/ }),
-
 /***/ 71269:
 /***/ ((module) => {
 
@@ -63865,13 +63380,499 @@ module.exports = require("zlib");;
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module doesn't tell about it's top-level declarations so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(39532);
-/******/ 	module.exports = __webpack_exports__;
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be in strict mode.
+(() => {
+"use strict";
+// ESM COMPAT FLAG
+__nccwpck_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./node_modules/tslib/tslib.js
+var tslib = __nccwpck_require__(4351);
+;// CONCATENATED MODULE: ./node_modules/tslib/modules/index.js
+
+const {
+    __extends,
+    __assign,
+    __rest,
+    __decorate,
+    __param,
+    __metadata,
+    __awaiter,
+    __generator,
+    __exportStar,
+    __createBinding,
+    __values,
+    __read,
+    __spread,
+    __spreadArrays,
+    __await,
+    __asyncGenerator,
+    __asyncDelegator,
+    __asyncValues,
+    __makeTemplateObject,
+    __importStar,
+    __importDefault,
+    __classPrivateFieldGet,
+    __classPrivateFieldSet,
+} = tslib;
+
+
+// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
+var core = __nccwpck_require__(42186);
+// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
+var github = __nccwpck_require__(95438);
+;// CONCATENATED MODULE: ./src/constants/github.ts
+const CODEOWNERS_PATH = './.github/CODEOWNERS';
+const SUPPROTED_EVENTS = ['pull_request', 'pull_request_review', 'pull_request_review_comment'];
+
+// EXTERNAL MODULE: ./node_modules/@slack/bolt/dist/index.js
+var dist = __nccwpck_require__(23311);
+;// CONCATENATED MODULE: ./src/utils/input.ts
+
+const SLACK_BOT_TOKEN = core.getInput('slack-bot-token', { required: true });
+const TARGET_SLACK_CHANNEL_ID = core.getInput('slack-channel-id', { required: true });
+const SLACK_BOT_SIGNING_SECRET = core.getInput('slack-bot-signing-secret', { required: true });
+const USER_INFO_URL = core.getInput('user-info-url', { required: true });
+
+;// CONCATENATED MODULE: ./src/utils/slack.ts
+
+
+
+
+const slackClient = new dist.App({
+    token: SLACK_BOT_TOKEN,
+    signingSecret: SLACK_BOT_SIGNING_SECRET,
+});
+function createSlackMention(developer) {
+    return developer.email.includes('@dummy.io') ? `@${developer.githubUserName}` : `<@${developer.slackUserId}>`;
+}
+function sendMessage(args) {
+    return slackClient.client.chat.postMessage(args);
+}
+function sendReviewApprovedSlackMessage({ pullRequest: { repository, link, title, owner }, review: { author }, }) {
+    const blocks = [
+        {
+            type: 'header',
+            text: {
+                type: 'plain_text',
+                text: 'Pull Request가 승인되었어요! :white_check_mark:',
+            },
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*${repository}* < <${link}|${title}>`,
+            },
+        },
+        {
+            type: 'divider',
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `${createSlackMention(author)}님이 ${createSlackMention(owner)}님의 Pull Request를 승인했어요. 이제 머지하러가볼까요?`,
+            },
+        },
+        {
+            type: 'actions',
+            elements: [
+                {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: '머지하러가기 :partymerge:',
+                        emoji: true,
+                    },
+                    style: 'primary',
+                    url: link,
+                },
+            ],
+        },
+    ];
+    return sendMessage({
+        channel: TARGET_SLACK_CHANNEL_ID,
+        text: '',
+        blocks,
+    });
+}
+function sendPullRequestReviewSlackMessage({ reviewers, repository, owner, link, title }) {
+    const reviewerNames = reviewers
+        .map(reviewer => (reviewer ? `${createSlackMention(reviewer)}님` : null))
+        .filter(v => v != null)
+        .join(',');
+    const blocks = [
+        {
+            type: 'header',
+            text: {
+                type: 'plain_text',
+                text: '새로운 Pull Request가 오픈되었어요 :eyes:',
+            },
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `*${repository}* > <${link}|${title}>`,
+            },
+        },
+        {
+            type: 'divider',
+        },
+        {
+            type: 'section',
+            text: {
+                type: 'mrkdwn',
+                text: `${createSlackMention(owner)}님이 ${reviewerNames}께 리뷰를 요청했어요\n메이트가 리뷰로 인해 작업 진행을 못 하는 일이 없도록, 되도록이면 하루가 지나기 전에 리뷰를 부탁드려요!`,
+            },
+        },
+        {
+            type: 'actions',
+            elements: [
+                {
+                    type: 'button',
+                    text: {
+                        type: 'plain_text',
+                        text: '지금 리뷰하기 :fire:',
+                        emoji: true,
+                    },
+                    style: 'primary',
+                    url: link,
+                },
+            ],
+        },
+    ];
+    return sendMessage({
+        channel: TARGET_SLACK_CHANNEL_ID,
+        text: '',
+        blocks,
+    });
+}
+function sendPullRequestCommentSlackMessage({ pullRequest: { repository, link, title }, comment, }) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const blocks = [
+            {
+                type: 'header',
+                text: {
+                    type: 'plain_text',
+                    text: 'Pull Request에 새로운 댓글이 달렸어요',
+                },
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: `*${repository}* > <${link}|${title}>`,
+                },
+            },
+            {
+                type: 'divider',
+            },
+            {
+                type: 'section',
+                text: {
+                    type: 'mrkdwn',
+                    text: yield replaceGithubUserToSlackUserInString(comment.message),
+                },
+            },
+        ];
+        return sendMessage({
+            channel: TARGET_SLACK_CHANNEL_ID,
+            text: '',
+            blocks,
+        });
+    });
+}
+
+// EXTERNAL MODULE: ./node_modules/node-fetch/lib/index.js
+var lib = __nccwpck_require__(80467);
+var lib_default = /*#__PURE__*/__nccwpck_require__.n(lib);
+;// CONCATENATED MODULE: ./src/utils/user.ts
+
+
+
+
+function fetchDevelopers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield lib_default()(USER_INFO_URL);
+        return (yield response.json());
+    });
+}
+function getDeveloperByGithubUser(developers, githubUserName) {
+    var _a;
+    return ((_a = developers.find(user => user.githubUserName === githubUserName)) !== null && _a !== void 0 ? _a : {
+        githubUserName: githubUserName,
+        email: `${githubUserName}@dummy.io`,
+        slackUserId: githubUserName,
+    });
+}
+function hasMentionInMessage(message) {
+    const words = message.split(/\s/);
+    return words.filter(word => word.includes('@')).length > 0;
+}
+function replaceGithubUserInString(message, replacer) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const words = message.split(/\s/);
+        const developers = yield fetchDevelopers();
+        return words
+            .map(message => {
+            var _a;
+            const githubUser = (_a = message.match(/@[a-z-_]+/)) === null || _a === void 0 ? void 0 : _a[0].replace('@', '');
+            if (githubUser == null) {
+                return message;
+            }
+            else {
+                const developer = getDeveloperByGithubUser(developers, githubUser !== null && githubUser !== void 0 ? githubUser : '');
+                return replacer(developer);
+            }
+        })
+            .join(' ');
+    });
+}
+function replaceGithubUserToSlackUserInString(message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return replaceGithubUserInString(message, createSlackMention);
+    });
+}
+
+// EXTERNAL MODULE: external "fs"
+var external_fs_ = __nccwpck_require__(35747);
+var external_fs_default = /*#__PURE__*/__nccwpck_require__.n(external_fs_);
+;// CONCATENATED MODULE: ./src/utils/file.ts
+
+
+function readFile(file) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            external_fs_default().readFile(file, { encoding: 'utf-8' }, (err, data) => {
+                if (err)
+                    reject(err);
+                resolve(data);
+            });
+        });
+    });
+}
+
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(85622);
+var external_path_default = /*#__PURE__*/__nccwpck_require__.n(external_path_);
+;// CONCATENATED MODULE: ./src/utils/github/repositories.ts
+
+
+
+
+
+
+function getCodeOwners() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const filePath = external_path_default().join((_a = process.env.GITHUB_WORKSPACE) !== null && _a !== void 0 ? _a : './', CODEOWNERS_PATH);
+        const pullRequestOwner = yield getPullRequestOwner();
+        try {
+            const contents = yield readFile(filePath);
+            const codeOwners = contents
+                .replace(/\*\s/, '')
+                .split(/\s/)
+                .map(member => member.replace('@', ''))
+                .filter(owner => owner !== pullRequestOwner.githubUserName);
+            return codeOwners;
+        }
+        catch (_b) {
+            return [];
+        }
+    });
+}
+function getRepositoryName() {
+    const { repository } = github.context.payload;
+    return repository === null || repository === void 0 ? void 0 : repository.name;
+}
+
+;// CONCATENATED MODULE: ./src/utils/github/pullRequests.ts
+
+
+
+
+function getPullRequestOwner() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { pull_request } = github.context.payload;
+        const developers = yield fetchDevelopers();
+        const owner = pull_request === null || pull_request === void 0 ? void 0 : pull_request.user;
+        return getDeveloperByGithubUser(developers, owner.login);
+    });
+}
+function getAssignedPullRequestReviewers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const developers = yield fetchDevelopers();
+        const { pull_request } = github.context.payload;
+        const codeOwners = yield getCodeOwners();
+        const prReviewers = pull_request === null || pull_request === void 0 ? void 0 : pull_request.requested_reviewers;
+        const reviewers = codeOwners.length > 0 ? codeOwners : prReviewers.map(reviewer => reviewer.login);
+        return reviewers
+            .map(user => getDeveloperByGithubUser(developers, user))
+            .filter((user) => user != null);
+    });
+}
+function getRawPullReuqestReview() {
+    return github.context.payload.review;
+}
+function getRawPullRequestComment() {
+    return github.context.payload.comment;
+}
+function getDeveloperFromGithubUser(user) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const developers = yield fetchDevelopers();
+        const rawGithubUserName = user.login;
+        return getDeveloperByGithubUser(developers, rawGithubUserName);
+    });
+}
+function getPullRequest() {
+    var _a, _b, _c, _d;
+    return __awaiter(this, void 0, void 0, function* () {
+        const { pull_request } = github.context.payload;
+        const reviewers = yield getAssignedPullRequestReviewers();
+        const owner = yield getPullRequestOwner();
+        const repository = (_a = getRepositoryName()) !== null && _a !== void 0 ? _a : '';
+        return {
+            title: ((_b = pull_request === null || pull_request === void 0 ? void 0 : pull_request.title) !== null && _b !== void 0 ? _b : ''),
+            body: (_c = pull_request === null || pull_request === void 0 ? void 0 : pull_request.body) !== null && _c !== void 0 ? _c : '',
+            link: ((_d = pull_request === null || pull_request === void 0 ? void 0 : pull_request._links.html.href) !== null && _d !== void 0 ? _d : ''),
+            reviewers,
+            owner,
+            repository,
+        };
+    });
+}
+function getPullRequestComment() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const comment = getRawPullRequestComment();
+        const author = yield getDeveloperFromGithubUser(comment.user);
+        return {
+            author,
+            message: comment.body,
+        };
+    });
+}
+function getPullRequestReview() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const review = getRawPullReuqestReview();
+        const author = yield getDeveloperFromGithubUser(review.user);
+        return {
+            author,
+            message: review.body,
+            state: review.state,
+        };
+    });
+}
+
+;// CONCATENATED MODULE: ./src/models/github.ts
+var GithubActionEventName;
+(function (GithubActionEventName) {
+    GithubActionEventName["PR\uC5F4\uB9BC"] = "CREATED_PULL_REQUEST";
+    GithubActionEventName["PR\uBA38\uC9C0\uC2B9\uC778"] = "APPROVED_PULL_REQUEST";
+    GithubActionEventName["PR\uB9AC\uBDF0\uCF54\uBA58\uD2B8"] = "COMMENTED_PULL_REQUEST";
+})(GithubActionEventName || (GithubActionEventName = {}));
+
+;// CONCATENATED MODULE: ./src/utils/github/events.ts
+
+
+function isReadyCodeReview() {
+    const { eventName, payload } = github.context;
+    const isPullReqeustEvent = eventName === 'pull_request';
+    const isReadyForReview = payload.action === 'opened' || payload.action === 'reopened' || payload.action === 'ready_for_review';
+    return isPullReqeustEvent && isReadyForReview;
+}
+function isApprovedCodeReview() {
+    const { eventName, payload } = github.context;
+    const isReviewEvent = eventName === 'pull_request_review';
+    return isReviewEvent && payload.action === 'submitted' && payload.review.state === 'approved';
+}
+function isCreatedPullRequestComment() {
+    const { eventName, payload } = github.context;
+    const isPullRequestCommentEvent = eventName === 'pull_request_review_comment';
+    return isPullRequestCommentEvent && payload.action === 'created';
+}
+function parseGithubEvent() {
+    if (isReadyCodeReview()) {
+        return {
+            type: GithubActionEventName["PR열림"],
+        };
+    }
+    else if (isApprovedCodeReview()) {
+        return {
+            type: GithubActionEventName["PR머지승인"],
+        };
+    }
+    else if (isCreatedPullRequestComment()) {
+        return {
+            type: GithubActionEventName["PR리뷰코멘트"],
+        };
+    }
+    return null;
+}
+
+;// CONCATENATED MODULE: ./src/index.ts
+
+
+
+
+
+
+
+
+
+
+const { eventName, payload } = github.context;
+function main() {
+    return __awaiter(this, void 0, void 0, function* () {
+        core.info('🔥 Run.....');
+        core.info(`eventName = ${eventName}`);
+        core.info(`action = ${payload.action}`);
+        core.info(`token = ${SLACK_BOT_TOKEN.length}`);
+        if (!SUPPROTED_EVENTS.includes(eventName)) {
+            core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
+            return;
+        }
+        const pullRequest = yield getPullRequest();
+        const githubEvent = parseGithubEvent();
+        if (githubEvent == null) {
+            return;
+        }
+        switch (githubEvent.type) {
+            case GithubActionEventName["PR열림"]: {
+                core.info('Pull Request 오픈이 감지되었습니다. 메세지를 보냅니다.');
+                yield sendPullRequestReviewSlackMessage(pullRequest);
+                break;
+            }
+            case GithubActionEventName["PR머지승인"]: {
+                core.info('Pull Request 승인이 감지되었습니다. 메세지를 보냅니다.');
+                const review = yield getPullRequestReview();
+                yield sendReviewApprovedSlackMessage({ pullRequest, review });
+                break;
+            }
+            case GithubActionEventName["PR리뷰코멘트"]: {
+                const comment = yield getPullRequestComment();
+                if (hasMentionInMessage(comment.message)) {
+                    core.info('Pull Request에 멘션이 포함된 새로운 댓글이 감지되었습니다. 메세지를 보냅니다.');
+                    yield sendPullRequestCommentSlackMessage({ pullRequest, comment });
+                }
+                break;
+            }
+        }
+        core.info('👋 Done');
+    });
+}
+try {
+    main();
+}
+catch (e) {
+    core.setFailed(e);
+}
+
+})();
+
+module.exports = __webpack_exports__;
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
