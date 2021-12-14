@@ -10,7 +10,7 @@ import {
   sendPullRequestReviewSlackMessage,
   sendReviewApprovedSlackMessage,
 } from 'utils/slack';
-import { SLACK_BOT_TOKEN } from 'utils/input';
+import { SLACK_BOT_TOKEN, USER_INFO_URL } from 'utils/input';
 
 const { eventName, payload } = github.context;
 
@@ -24,6 +24,8 @@ async function main() {
     core.warning(`현재 이 액션은 ${SUPPROTED_EVENTS.join(', ')} 이벤트만 지원합니다.`);
     return;
   }
+
+  core.info(`USER_INFO_URL = ${USER_INFO_URL}`);
 
   const pullRequest = await getPullRequest();
   const githubEvent = parseGithubEvent();

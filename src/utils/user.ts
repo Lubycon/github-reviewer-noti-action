@@ -2,9 +2,11 @@ import { User } from '../models/developer';
 import { createSlackMention } from './slack';
 import fetch from 'node-fetch';
 import { USER_INFO_URL } from './input';
+import * as core from '@actions/core';
 
 export async function fetchDevelopers() {
   const response = await fetch(USER_INFO_URL);
+  core.info(`RESPONSE ${response}`);
   return (await response.json()) as User[];
 }
 
