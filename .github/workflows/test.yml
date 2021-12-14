@@ -33,4 +33,4 @@ jobs:
           slack-bot-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel-id: ${{ secrets.TEST_SLACK_CHANNEL_ID }}
           slack-bot-signing-secret: ${{ secrets.SLACK_SIGNING_SECRET }}
-          user-info-url: https://raw.githubusercontent.com/Lubycon/lubycon-users/main/users.json
+          user-info-url: 'https://raw.githubusercontent.com/Lubycon/lubycon-users/main/users.json'
